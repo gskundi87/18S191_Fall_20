@@ -335,18 +335,28 @@ md"""
 # ╔═╡ f6e2cb2a-ee07-11ea-06ee-1b77e34c1e91
 begin
 	function noisify(x::Number, s)
-
-		return missing
+		y = x + rand((-s,s))
+		if y > 1
+			y = 1
+		end
+		if y < 0
+			y = 0
+		end
+		return y
 	end
 	
 	function noisify(color::AbstractRGB, s)
-		# you will write me in a later exercise!
-		return missing
+		r = noisify(color.r, s)
+		g = noisify(color.g, s)
+		b = noisify(color.b, s)
+		return RGB(r,g,b)
 	end
 	
 	function noisify(image::AbstractMatrix, s)
-		# you will write me in a later exercise!
-		return missing
+		x = size(image)[1]
+		y = size(image)[2]
+		t = [noisify(image[i, j], s) for i = 1:x, j = 1:y]
+		return t
 	end
 end
 
@@ -463,7 +473,7 @@ You've seen some colored lines in this notebook to visualize arrays. Can you mak
 """
 
 # ╔═╡ 01070e28-ee0f-11ea-1928-a7919d452bdd
-
+colored_line(v)
 
 # ╔═╡ 7522f81e-ee1c-11ea-35af-a17eb257ff1a
 md"Try changing `n` and `v` around. Notice that you can run the cell `v = rand(n)` again to regenerate new random values."
@@ -478,11 +488,25 @@ A better solution is to use the *closest* value that is inside the vector. Effec
 👉 Write a function `extend(v, i)` that checks whether the position $i$ is inside `1:n`. If so, return the $i$th component of `v`; otherwise, return the nearest end value.
 """
 
+# ╔═╡ f81e2246-fb77-4f26-9277-65e90128cdfa
+size(v)
+
+# ╔═╡ 02bd0111-929b-4b4e-8bf3-5476657e20b7
+typeof(v)
+
 # ╔═╡ 802bec56-ee09-11ea-043e-51cf1db02a34
 function extend(v, i)
-	
-	return missing
+	if i < 1
+		return v[1]
+	elseif i > size(v)[1]
+		return v[size(v)[1]]
+	else
+		return v[i]		
+	end
 end
+
+# ╔═╡ 9f378f9f-cb4f-40ec-b6ab-c73cc9485bc1
+v
 
 # ╔═╡ b7f3994c-ee1b-11ea-211a-d144db8eafc2
 md"_Some test cases:_"
@@ -512,6 +536,18 @@ else
 	colored_line([extend(example_vector, i) for i in -1:12])
 end
 
+# ╔═╡ ea785b5b-07ab-4347-b085-5b4d3f2cbce4
+[extend(example_vector, i) for i in -1:12]
+
+# ╔═╡ b0706865-5288-4355-930a-c96925f8016e
+example_vector
+
+# ╔═╡ d1833ef2-86d5-4020-a317-55392bc019aa
+vt = [extend(v, i) for i in (1-1):(size(v)[1]+1)]
+
+# ╔═╡ 6209e71f-0282-4494-a6d2-d539a1823d44
+size(vt)
+
 # ╔═╡ 80664e8c-ee09-11ea-0702-711bce271315
 md"""
 #### Exercise 3.3
@@ -520,9 +556,17 @@ md"""
 
 # ╔═╡ 807e5662-ee09-11ea-3005-21fdcc36b023
 function blur_1D(v, l)
-	
-	return missing
+	v1 = [extend(v, i) for i in (1-l):(size(v)[1]+l)]
+	v2 = Float64[]
+	for x in 1+l:size(v1)[1]-l
+		y = sum(v1[x-l:x+l])/(2*l+1)
+		push!(v2,y)
+	end
+	return v2
 end
+
+# ╔═╡ f925811c-46b2-47f7-82cf-96d710d71b23
+h = Vector{Float64}
 
 # ╔═╡ 808deca8-ee09-11ea-0ee3-1586fa1ce282
 let
@@ -546,8 +590,17 @@ md"""
 👉 Apply the box blur to your vector `v`. Show the original and the new vector by creating two cells that call `colored_line`. Make the parameter $\ell$ interactive, and call it `l_box` instead of just `l` to avoid a variable naming conflict.
 """
 
-# ╔═╡ ca1ac5f4-ee1c-11ea-3d00-ff5268866f87
+# ╔═╡ 521d5613-af85-486e-b4dd-a73d09be9fc4
+@bind l_box Slider(0:1:100, show_value=true)
 
+# ╔═╡ 461fdb53-daaa-4a29-8a49-49534a96d0af
+v3 = blur_1D(v, l_box)
+
+# ╔═╡ 0d8ef38f-8816-472e-aeea-d73b95c34467
+colored_line(v)
+
+# ╔═╡ ca1ac5f4-ee1c-11ea-3d00-ff5268866f87
+colored_line(v3)
 
 # ╔═╡ 80ab64f4-ee09-11ea-29b4-498112ed0799
 md"""
@@ -565,14 +618,23 @@ Again, we need to take care about what happens if $v_{i -n }$ falls off the end 
 
 # ╔═╡ 28e20950-ee0c-11ea-0e0a-b5f2e570b56e
 function convolve_vector(v, k)
-	
-	return missing
+	l = (length(k) - 1) ÷ 2
+	v1 = [extend(v, i) for i in (1-l):(length(v)+l)]
+	v2 = Float64[]
+	for x in 1+l:length(v1)-l
+		z = 0
+		for y in 1:length(k)
+			z = z + k[length(k)+1-y]*v1[x-(l+1)+y]
+		end
+		push!(v2, z)
+	end	
+	return v2
 end
 
 # ╔═╡ 93284f92-ee12-11ea-0342-833b1a30625c
 test_convolution = let
 	v = [1, 10, 100, 1000, 10000]
-	k = [0, 1, 0]
+	k = [0, 1, 1]
 	convolve_vector(v, k)
 end
 
@@ -1381,7 +1443,7 @@ with_sobel_edge_detect(sobel_camera_image)
 # ╠═74b008f6-ed6b-11ea-291f-b3791d6d1b35
 # ╟─54056a02-ee0a-11ea-101f-47feb6623bec
 # ╟─540ccfcc-ee0a-11ea-15dc-4f8120063397
-# ╟─467856dc-eded-11ea-0f83-13d939021ef3
+# ╠═467856dc-eded-11ea-0f83-13d939021ef3
 # ╠═56ced344-eded-11ea-3e81-3936e9ad5777
 # ╟─ad6a33b0-eded-11ea-324c-cfabfd658b56
 # ╠═f51333a6-eded-11ea-34e6-bfbb3a69bcb0
@@ -1414,8 +1476,8 @@ with_sobel_edge_detect(sobel_camera_image)
 # ╟─393667ca-edf2-11ea-09c5-c5d292d5e896
 # ╠═9f1c6d04-ed6c-11ea-007b-75e7e780703d
 # ╠═70955aca-ed6e-11ea-2330-89b4d20b1795
-# ╟─e06b7fbc-edf2-11ea-1708-fb32599dded3
-# ╟─5da8cbe8-eded-11ea-2e43-c5b7cc71e133
+# ╠═e06b7fbc-edf2-11ea-1708-fb32599dded3
+# ╠═5da8cbe8-eded-11ea-2e43-c5b7cc71e133
 # ╟─45815734-ee0a-11ea-2982-595e1fc0e7b1
 # ╟─e083b3e8-ed61-11ea-2ec9-217820b0a1b4
 # ╠═c5484572-ee05-11ea-0424-f37295c3072d
@@ -1469,7 +1531,10 @@ with_sobel_edge_detect(sobel_camera_image)
 # ╠═01070e28-ee0f-11ea-1928-a7919d452bdd
 # ╟─7522f81e-ee1c-11ea-35af-a17eb257ff1a
 # ╟─801d90c0-ee09-11ea-28d6-61b806de26dc
+# ╠═f81e2246-fb77-4f26-9277-65e90128cdfa
+# ╠═02bd0111-929b-4b4e-8bf3-5476657e20b7
 # ╠═802bec56-ee09-11ea-043e-51cf1db02a34
+# ╠═9f378f9f-cb4f-40ec-b6ab-c73cc9485bc1
 # ╟─b7f3994c-ee1b-11ea-211a-d144db8eafc2
 # ╠═803905b2-ee09-11ea-2d52-e77ff79693b0
 # ╠═80479d98-ee09-11ea-169e-d166eef65874
@@ -1478,11 +1543,19 @@ with_sobel_edge_detect(sobel_camera_image)
 # ╟─38da843a-ee0f-11ea-01df-bfa8b1317d36
 # ╟─9bde9f92-ee0f-11ea-27f8-ffef5fce2b3c
 # ╟─45c4da9a-ee0f-11ea-2c5b-1f6704559137
+# ╠═ea785b5b-07ab-4347-b085-5b4d3f2cbce4
+# ╠═b0706865-5288-4355-930a-c96925f8016e
+# ╠═d1833ef2-86d5-4020-a317-55392bc019aa
+# ╠═6209e71f-0282-4494-a6d2-d539a1823d44
 # ╟─bcf98dfc-ee1b-11ea-21d0-c14439500971
 # ╟─80664e8c-ee09-11ea-0702-711bce271315
 # ╠═807e5662-ee09-11ea-3005-21fdcc36b023
+# ╠═f925811c-46b2-47f7-82cf-96d710d71b23
 # ╟─808deca8-ee09-11ea-0ee3-1586fa1ce282
 # ╟─809f5330-ee09-11ea-0e5b-415044b6ac1f
+# ╠═521d5613-af85-486e-b4dd-a73d09be9fc4
+# ╠═461fdb53-daaa-4a29-8a49-49534a96d0af
+# ╠═0d8ef38f-8816-472e-aeea-d73b95c34467
 # ╠═ca1ac5f4-ee1c-11ea-3d00-ff5268866f87
 # ╟─ea435e58-ee11-11ea-3785-01af8dd72360
 # ╟─80ab64f4-ee09-11ea-29b4-498112ed0799
