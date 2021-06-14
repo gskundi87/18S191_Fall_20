@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.5
+# v0.14.8
 
 using Markdown
 using InteractiveUtils
@@ -29,6 +29,12 @@ end
 begin
 	Pkg.add("PlutoUI")
 	using PlutoUI
+end
+
+# ╔═╡ 83544f2e-a74a-4468-b620-95a36387b112
+begin
+	Pkg.add(["LinearAlgebra"])
+	using LinearAlgebra
 end
 
 # ╔═╡ 83eb9ca0-ed68-11ea-0bc5-99a09c68f867
@@ -155,7 +161,7 @@ repeat([0],100)
 # ╔═╡ b6b65b94-edf0-11ea-3686-fbff0ff53d08
 function create_bar()
 	x = repeat([0],100)
-	for i in 41:60
+	for i in (length(x)÷2-9):(length(x)÷2+10)
 		x[i] = 1
 	end
 	return x
@@ -220,6 +226,9 @@ Let's load a picture of Philip again.
 
 # ╔═╡ c5484572-ee05-11ea-0424-f37295c3072d
 philip_file = download("https://i.imgur.com/VGPeJ6s.jpg")
+
+# ╔═╡ b379db88-d844-42d1-ba82-553f0e55814d
+philip_temp = load("philip.jpg")
 
 # ╔═╡ e86ed944-ee05-11ea-3e0f-d70fc73b789c
 md"_Hi there Philip_"
@@ -408,6 +417,12 @@ The image is unrecognisable with intensity ...
 # ╔═╡ e3b03628-ee05-11ea-23b6-27c7b0210532
 decimate(image, ratio=5) = image[1:ratio:end, 1:ratio:end]
 
+# ╔═╡ f5c4ae89-e790-478f-9bb0-1320540d81fc
+philip_1 = let
+	original = philip_temp
+	decimate(original, 8)
+end
+
 # ╔═╡ c8ecfe5c-ee05-11ea-322b-4b2714898831
 philip = let
 	original = Images.load(philip_file)
@@ -498,8 +513,8 @@ typeof(v)
 function extend(v, i)
 	if i < 1
 		return v[1]
-	elseif i > size(v)[1]
-		return v[size(v)[1]]
+	elseif i > length(v)
+		return v[length(v)]
 	else
 		return v[i]		
 	end
@@ -556,9 +571,9 @@ md"""
 
 # ╔═╡ 807e5662-ee09-11ea-3005-21fdcc36b023
 function blur_1D(v, l)
-	v1 = [extend(v, i) for i in (1-l):(size(v)[1]+l)]
+	v1 = [extend(v, i) for i in (1-l):(length(v)+l)]
 	v2 = Float64[]
-	for x in 1+l:size(v1)[1]-l
+	for x in (1+l):(length(v)-l)
 		y = sum(v1[x-l:x+l])/(2*l+1)
 		push!(v2,y)
 	end
@@ -621,10 +636,10 @@ function convolve_vector(v, k)
 	l = (length(k) - 1) ÷ 2
 	v1 = [extend(v, i) for i in (1-l):(length(v)+l)]
 	v2 = Float64[]
-	for x in 1+l:length(v1)-l
+	for x in (1+l):(length(v1)-l)
 		z = 0
 		for y in 1:length(k)
-			z = z + k[length(k)+1-y]*v1[x-(l+1)+y]
+			z = z + v1[x-(l+1)+y]*k[y]
 		end
 		push!(v2, z)
 	end	
@@ -661,15 +676,47 @@ For simplicity you can take $\sigma=1$.
 
 # ╔═╡ 1c8b4658-ee0c-11ea-2ede-9b9ed7d3125e
 function gaussian_kernel(n)
+	σ = 1
+	gk = Float64[]
+	x = n^2
 	
-	return missing
+	for i in -x:x
+		push!(gk,exp((-(i^2))/(2*(σ^2)))/sqrt(2*π*(σ^2)))
+	end
+	
+	normal = norm(gk)
+	gk = [gk[i]/normal for i in 1:length(gk)]
+	
+	return gk
 end
 
 # ╔═╡ f8bd22b8-ee14-11ea-04aa-ab16fd01826e
 md"Let's test your kernel function!"
 
+# ╔═╡ 39edaf6f-7e98-448b-ab85-7a18e0c1883d
+random_vect
+
+# ╔═╡ ba64e13b-5847-41d9-9859-c35eba15ba56
+v
+
+# ╔═╡ c5fa1217-fc0a-4d2b-a63a-a7e23e4130d6
+size(v)
+
+# ╔═╡ 7daa3627-ae06-454a-94fa-ff30e16a5778
+@bind g_box Slider(0:1:100, show_value=true)
+
 # ╔═╡ 2a9dd06a-ee13-11ea-3f84-67bb309c77a8
-gaussian_kernel_size_1D = 3 # change this value, or turn me into a slider!
+gaussian_kernel_size_1D = g_box # change this value, or turn me into a slider!
+
+# ╔═╡ 4e0245c1-d726-4c0a-8a02-eee9003361f6
+g_kernel = gaussian_kernel(gaussian_kernel_size_1D)
+
+# ╔═╡ d3cade39-a293-496b-ac25-c9aee2b8b463
+colored_line(g_kernel)
+
+# ╔═╡ eceb44e6-6b7b-4d13-b4b5-0c2e0f35116b
+test_gauss_1D_c = convolve_vector(v, g_kernel)
+
 
 # ╔═╡ 38eb92f6-ee13-11ea-14d7-a503ac04302e
 test_gauss_1D_a = let
@@ -696,6 +743,12 @@ end
 
 # ╔═╡ bc1c20a4-ee14-11ea-3525-63c9fa78f089
 colored_line(test_gauss_1D_b)
+
+# ╔═╡ 6fa39641-3d3e-4d14-b0e2-5fbf54b48c79
+colored_line(v)
+
+# ╔═╡ ef58826c-904f-48b5-84ed-585af39265f3
+colored_line(test_gauss_1D_c)
 
 # ╔═╡ b01858b6-edf3-11ea-0826-938d33c19a43
 md"""
@@ -1476,11 +1529,13 @@ with_sobel_edge_detect(sobel_camera_image)
 # ╟─393667ca-edf2-11ea-09c5-c5d292d5e896
 # ╠═9f1c6d04-ed6c-11ea-007b-75e7e780703d
 # ╠═70955aca-ed6e-11ea-2330-89b4d20b1795
-# ╠═e06b7fbc-edf2-11ea-1708-fb32599dded3
-# ╠═5da8cbe8-eded-11ea-2e43-c5b7cc71e133
+# ╟─e06b7fbc-edf2-11ea-1708-fb32599dded3
+# ╟─5da8cbe8-eded-11ea-2e43-c5b7cc71e133
 # ╟─45815734-ee0a-11ea-2982-595e1fc0e7b1
 # ╟─e083b3e8-ed61-11ea-2ec9-217820b0a1b4
 # ╠═c5484572-ee05-11ea-0424-f37295c3072d
+# ╠═b379db88-d844-42d1-ba82-553f0e55814d
+# ╠═f5c4ae89-e790-478f-9bb0-1320540d81fc
 # ╠═c8ecfe5c-ee05-11ea-322b-4b2714898831
 # ╠═cbaa90b7-7352-473b-b68e-d50de37d1fd9
 # ╟─e86ed944-ee05-11ea-3e0f-d70fc73b789c
@@ -1542,7 +1597,7 @@ with_sobel_edge_detect(sobel_camera_image)
 # ╟─806e5766-ee0f-11ea-1efc-d753cd83d086
 # ╟─38da843a-ee0f-11ea-01df-bfa8b1317d36
 # ╟─9bde9f92-ee0f-11ea-27f8-ffef5fce2b3c
-# ╟─45c4da9a-ee0f-11ea-2c5b-1f6704559137
+# ╠═45c4da9a-ee0f-11ea-2c5b-1f6704559137
 # ╠═ea785b5b-07ab-4347-b085-5b4d3f2cbce4
 # ╠═b0706865-5288-4355-930a-c96925f8016e
 # ╠═d1833ef2-86d5-4020-a317-55392bc019aa
@@ -1566,15 +1621,25 @@ with_sobel_edge_detect(sobel_camera_image)
 # ╟─cf73f9f8-ee12-11ea-39ae-0107e9107ef5
 # ╟─7ffd14f8-ee1d-11ea-0343-b54fb0333aea
 # ╟─80b7566a-ee09-11ea-3939-6fab470f9ec8
+# ╠═83544f2e-a74a-4468-b620-95a36387b112
 # ╠═1c8b4658-ee0c-11ea-2ede-9b9ed7d3125e
 # ╟─f8bd22b8-ee14-11ea-04aa-ab16fd01826e
 # ╠═2a9dd06a-ee13-11ea-3f84-67bb309c77a8
-# ╟─b424e2aa-ee14-11ea-33fa-35491e0b9c9d
+# ╠═4e0245c1-d726-4c0a-8a02-eee9003361f6
+# ╠═d3cade39-a293-496b-ac25-c9aee2b8b463
+# ╠═b424e2aa-ee14-11ea-33fa-35491e0b9c9d
+# ╠═39edaf6f-7e98-448b-ab85-7a18e0c1883d
 # ╠═38eb92f6-ee13-11ea-14d7-a503ac04302e
-# ╟─bc1c20a4-ee14-11ea-3525-63c9fa78f089
+# ╠═bc1c20a4-ee14-11ea-3525-63c9fa78f089
 # ╠═24c21c7c-ee14-11ea-1512-677980db1288
+# ╠═ba64e13b-5847-41d9-9859-c35eba15ba56
+# ╠═c5fa1217-fc0a-4d2b-a63a-a7e23e4130d6
+# ╠═eceb44e6-6b7b-4d13-b4b5-0c2e0f35116b
+# ╠═7daa3627-ae06-454a-94fa-ff30e16a5778
+# ╠═6fa39641-3d3e-4d14-b0e2-5fbf54b48c79
+# ╠═ef58826c-904f-48b5-84ed-585af39265f3
 # ╟─27847dc4-ee0a-11ea-0651-ebbbb3cfd58c
-# ╠═b01858b6-edf3-11ea-0826-938d33c19a43
+# ╟─b01858b6-edf3-11ea-0826-938d33c19a43
 # ╟─7c1bc062-ee15-11ea-30b1-1b1e76520f13
 # ╠═7c2ec6c6-ee15-11ea-2d7d-0d9401a5e5d1
 # ╟─649df270-ee24-11ea-397e-79c4355e38db
