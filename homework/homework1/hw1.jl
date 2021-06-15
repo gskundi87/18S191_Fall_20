@@ -33,8 +33,9 @@ end
 
 # ╔═╡ 83544f2e-a74a-4468-b620-95a36387b112
 begin
-	Pkg.add(["LinearAlgebra"])
+	Pkg.add(["LinearAlgebra", "Plots"])
 	using LinearAlgebra
+	using Plots
 end
 
 # ╔═╡ 83eb9ca0-ed68-11ea-0bc5-99a09c68f867
@@ -684,8 +685,7 @@ function gaussian_kernel(n)
 		push!(gk,exp((-(i^2))/(2*(σ^2)))/sqrt(2*π*(σ^2)))
 	end
 	
-	normal = norm(gk)
-	gk = [gk[i]/normal for i in 1:length(gk)]
+	gk = gk/sum(gk)
 	
 	return gk
 end
@@ -710,6 +710,12 @@ gaussian_kernel_size_1D = g_box # change this value, or turn me into a slider!
 
 # ╔═╡ 4e0245c1-d726-4c0a-8a02-eee9003361f6
 g_kernel = gaussian_kernel(gaussian_kernel_size_1D)
+
+# ╔═╡ 40477709-c09e-4710-a845-9f998f1bc9e8
+plot(g_kernel)
+
+# ╔═╡ 73d39d69-9f7a-4274-b36c-edf773826d53
+sum(g_kernel)
 
 # ╔═╡ d3cade39-a293-496b-ac25-c9aee2b8b463
 colored_line(g_kernel)
@@ -775,6 +781,8 @@ md"""
 
 # ╔═╡ 7c2ec6c6-ee15-11ea-2d7d-0d9401a5e5d1
 function extend_mat(M::AbstractMatrix, i, j)
+	num_rows, num_cols = size(M)
+	
 	
 	return missing
 end
@@ -1625,6 +1633,8 @@ with_sobel_edge_detect(sobel_camera_image)
 # ╠═1c8b4658-ee0c-11ea-2ede-9b9ed7d3125e
 # ╟─f8bd22b8-ee14-11ea-04aa-ab16fd01826e
 # ╠═2a9dd06a-ee13-11ea-3f84-67bb309c77a8
+# ╠═40477709-c09e-4710-a845-9f998f1bc9e8
+# ╠═73d39d69-9f7a-4274-b36c-edf773826d53
 # ╠═4e0245c1-d726-4c0a-8a02-eee9003361f6
 # ╠═d3cade39-a293-496b-ac25-c9aee2b8b463
 # ╠═b424e2aa-ee14-11ea-33fa-35491e0b9c9d
