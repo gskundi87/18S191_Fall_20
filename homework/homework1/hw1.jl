@@ -637,13 +637,17 @@ function convolve_vector(v, k)
 	l = (length(k) - 1) ÷ 2
 	v1 = [extend(v, i) for i in (1-l):(length(v)+l)]
 	v2 = Float64[]
+	
 	for x in (1+l):(length(v1)-l)
 		z = 0
+		
 		for y in 1:length(k)
 			z = z + v1[x-(l+1)+y]*k[y]
 		end
+		
 		push!(v2, z)
 	end	
+	
 	return v2
 end
 
@@ -693,16 +697,7 @@ end
 # ╔═╡ f8bd22b8-ee14-11ea-04aa-ab16fd01826e
 md"Let's test your kernel function!"
 
-# ╔═╡ 39edaf6f-7e98-448b-ab85-7a18e0c1883d
-random_vect
-
-# ╔═╡ ba64e13b-5847-41d9-9859-c35eba15ba56
-v
-
-# ╔═╡ c5fa1217-fc0a-4d2b-a63a-a7e23e4130d6
-size(v)
-
-# ╔═╡ 7daa3627-ae06-454a-94fa-ff30e16a5778
+# ╔═╡ cff5a206-6cdb-4ce2-94f9-ca89b6810909
 @bind g_box Slider(0:1:100, show_value=true)
 
 # ╔═╡ 2a9dd06a-ee13-11ea-3f84-67bb309c77a8
@@ -711,18 +706,11 @@ gaussian_kernel_size_1D = g_box # change this value, or turn me into a slider!
 # ╔═╡ 4e0245c1-d726-4c0a-8a02-eee9003361f6
 g_kernel = gaussian_kernel(gaussian_kernel_size_1D)
 
-# ╔═╡ 40477709-c09e-4710-a845-9f998f1bc9e8
-plot(g_kernel)
-
 # ╔═╡ 73d39d69-9f7a-4274-b36c-edf773826d53
 sum(g_kernel)
 
-# ╔═╡ d3cade39-a293-496b-ac25-c9aee2b8b463
-colored_line(g_kernel)
-
-# ╔═╡ eceb44e6-6b7b-4d13-b4b5-0c2e0f35116b
-test_gauss_1D_c = convolve_vector(v, g_kernel)
-
+# ╔═╡ b35d6442-35df-48bd-9d6d-d20a936d4658
+colored_line(random_vect)
 
 # ╔═╡ 38eb92f6-ee13-11ea-14d7-a503ac04302e
 test_gauss_1D_a = let
@@ -737,6 +725,9 @@ end
 # ╔═╡ b424e2aa-ee14-11ea-33fa-35491e0b9c9d
 colored_line(test_gauss_1D_a)
 
+# ╔═╡ 3ae8cae8-f3c6-4960-baae-c96bedf5844c
+colored_line(create_bar())
+
 # ╔═╡ 24c21c7c-ee14-11ea-1512-677980db1288
 test_gauss_1D_b = let
 	v = create_bar()
@@ -749,6 +740,10 @@ end
 
 # ╔═╡ bc1c20a4-ee14-11ea-3525-63c9fa78f089
 colored_line(test_gauss_1D_b)
+
+# ╔═╡ eceb44e6-6b7b-4d13-b4b5-0c2e0f35116b
+test_gauss_1D_c = convolve_vector(v, g_kernel)
+
 
 # ╔═╡ 6fa39641-3d3e-4d14-b0e2-5fbf54b48c79
 colored_line(v)
@@ -783,8 +778,31 @@ md"""
 function extend_mat(M::AbstractMatrix, i, j)
 	num_rows, num_cols = size(M)
 	
-	
-	return missing
+	if (i < 1)
+		if (j < 1)
+			return M[1,1]
+		elseif (1 <= j <= num_cols)
+			return M[1,j]
+		else
+			return M[1,num_cols]
+		end
+	elseif (1 <= i <= num_rows)
+		if (j < 1)
+			return M[i,1]
+		elseif (1 <= j <= num_cols)
+			return M[i,j]
+		else
+			return M[i,num_cols]
+		end
+	else
+		if (j < 1)
+			return M[num_rows,1]
+		elseif (1 <= j <= num_cols)
+			return M[num_rows,j]
+		else
+			return M[num_rows,num_cols]
+		end
+	end
 end
 
 # ╔═╡ 9afc4dca-ee16-11ea-354f-1d827aaa61d2
@@ -792,6 +810,15 @@ md"_Let's test it!_"
 
 # ╔═╡ cf6b05e2-ee16-11ea-3317-8919565cb56e
 small_image = Gray.(rand(5,5))
+
+# ╔═╡ b560d867-413a-4a0b-b492-cc91e8c53290
+M = Array{Float64}(undef,2,2)
+
+# ╔═╡ ae0a6cc2-6c93-4322-bdad-5f46b7d742ea
+typeof(M)
+
+# ╔═╡ 88bf767d-8658-4b2c-9a19-4922c0bf57df
+small_image[1,3]
 
 # ╔═╡ e3616062-ee27-11ea-04a9-b9ec60842a64
 md"Extended with `0`:"
@@ -819,8 +846,32 @@ md"""
 
 # ╔═╡ 8b96e0bc-ee15-11ea-11cd-cfecea7075a0
 function convolve_image(M::AbstractMatrix, K::AbstractMatrix)
+	num_rows_m, num_cols_m = size(M)
+	num_rows_k, num_cols_k = size(K)
 	
-	return missing
+	l = (num_rows_k - 1) ÷ 2
+	m = (num_cols_k - 1) ÷ 2
+	
+	M2 = [extend_mat(M, i, j) for (i,j) in
+			Iterators.product(1-l:num_rows_m+l,1-m:num_cols_m+m)]
+	
+	num_rows_m2, num_cols_m2 = size(M2)
+	
+	M3 = Array{Float64}(undef,num_rows_m,num_cols_m)
+	
+	for x in (1+l):(num_rows_m2-l)
+		for y in (1+m):(num_cols_m2-m)
+			sum = 0.0
+			for w in 1:num_rows_k
+				for z in 1:num_cols_k
+					sum = sum + M2[x-(l+1)+w,y-(m+1)+z]*K[w,z]
+				end
+			end
+			M3[x-l,y-m] = sum
+		end
+	end
+	
+	return M3
 end
 
 # ╔═╡ 5a5135c6-ee1e-11ea-05dc-eb0c683c2ce5
@@ -832,18 +883,21 @@ test_image_with_border = [get(small_image, (i, j), Gray(0)) for (i,j) in Iterato
 # ╔═╡ 275a99c8-ee1e-11ea-0a76-93e3618c9588
 K_test = [
 	0   0  0
-	1/2 0  1/2
+	0.7 0  0.7
 	0   0  0
 ]
 
 # ╔═╡ 42dfa206-ee1e-11ea-1fcd-21671042064c
-convolve_image(test_image_with_border, K_test)
+Gray.(convolve_image(small_image, K_test))
 
 # ╔═╡ 6e53c2e6-ee1e-11ea-21bd-c9c05381be07
 md"_Edit_ `K_test` _to create your own test case!_"
 
+# ╔═╡ a66f87fa-e929-4946-96a8-cb442eb34116
+Gray.(philip)
+
 # ╔═╡ e7f8b41a-ee25-11ea-287a-e75d33fbd98b
-convolve_image(philip, K_test)
+Gray.(convolve_image(Gray.(philip), K_test))
 
 # ╔═╡ 8a335044-ee19-11ea-0255-b9391246d231
 md"""
@@ -1629,23 +1683,20 @@ with_sobel_edge_detect(sobel_camera_image)
 # ╟─cf73f9f8-ee12-11ea-39ae-0107e9107ef5
 # ╟─7ffd14f8-ee1d-11ea-0343-b54fb0333aea
 # ╟─80b7566a-ee09-11ea-3939-6fab470f9ec8
-# ╠═83544f2e-a74a-4468-b620-95a36387b112
-# ╠═1c8b4658-ee0c-11ea-2ede-9b9ed7d3125e
+# ╟─83544f2e-a74a-4468-b620-95a36387b112
+# ╟─1c8b4658-ee0c-11ea-2ede-9b9ed7d3125e
 # ╟─f8bd22b8-ee14-11ea-04aa-ab16fd01826e
+# ╠═cff5a206-6cdb-4ce2-94f9-ca89b6810909
 # ╠═2a9dd06a-ee13-11ea-3f84-67bb309c77a8
-# ╠═40477709-c09e-4710-a845-9f998f1bc9e8
 # ╠═73d39d69-9f7a-4274-b36c-edf773826d53
 # ╠═4e0245c1-d726-4c0a-8a02-eee9003361f6
-# ╠═d3cade39-a293-496b-ac25-c9aee2b8b463
+# ╠═b35d6442-35df-48bd-9d6d-d20a936d4658
 # ╠═b424e2aa-ee14-11ea-33fa-35491e0b9c9d
-# ╠═39edaf6f-7e98-448b-ab85-7a18e0c1883d
-# ╠═38eb92f6-ee13-11ea-14d7-a503ac04302e
+# ╟─38eb92f6-ee13-11ea-14d7-a503ac04302e
+# ╠═3ae8cae8-f3c6-4960-baae-c96bedf5844c
 # ╠═bc1c20a4-ee14-11ea-3525-63c9fa78f089
-# ╠═24c21c7c-ee14-11ea-1512-677980db1288
-# ╠═ba64e13b-5847-41d9-9859-c35eba15ba56
-# ╠═c5fa1217-fc0a-4d2b-a63a-a7e23e4130d6
-# ╠═eceb44e6-6b7b-4d13-b4b5-0c2e0f35116b
-# ╠═7daa3627-ae06-454a-94fa-ff30e16a5778
+# ╟─24c21c7c-ee14-11ea-1512-677980db1288
+# ╟─eceb44e6-6b7b-4d13-b4b5-0c2e0f35116b
 # ╠═6fa39641-3d3e-4d14-b0e2-5fbf54b48c79
 # ╠═ef58826c-904f-48b5-84ed-585af39265f3
 # ╟─27847dc4-ee0a-11ea-0651-ebbbb3cfd58c
@@ -1655,23 +1706,27 @@ with_sobel_edge_detect(sobel_camera_image)
 # ╟─649df270-ee24-11ea-397e-79c4355e38db
 # ╟─9afc4dca-ee16-11ea-354f-1d827aaa61d2
 # ╠═cf6b05e2-ee16-11ea-3317-8919565cb56e
+# ╠═b560d867-413a-4a0b-b492-cc91e8c53290
+# ╠═ae0a6cc2-6c93-4322-bdad-5f46b7d742ea
+# ╠═88bf767d-8658-4b2c-9a19-4922c0bf57df
 # ╟─e3616062-ee27-11ea-04a9-b9ec60842a64
-# ╟─e5b6cd34-ee27-11ea-0d60-bd4796540b18
+# ╠═e5b6cd34-ee27-11ea-0d60-bd4796540b18
 # ╟─d06ea762-ee27-11ea-2e9c-1bcff86a3fe0
-# ╟─e1dc0622-ee16-11ea-274a-3b6ec9e15ab5
+# ╠═e1dc0622-ee16-11ea-274a-3b6ec9e15ab5
 # ╟─efd1ceb4-ee1c-11ea-350e-f7e3ea059024
 # ╟─3cd535e4-ee26-11ea-2482-fb4ad43dda19
 # ╟─7c41f0ca-ee15-11ea-05fb-d97a836659af
 # ╠═8b96e0bc-ee15-11ea-11cd-cfecea7075a0
 # ╟─0cabed84-ee1e-11ea-11c1-7d8a4b4ad1af
 # ╟─5a5135c6-ee1e-11ea-05dc-eb0c683c2ce5
-# ╟─577c6daa-ee1e-11ea-1275-b7abc7a27d73
+# ╠═577c6daa-ee1e-11ea-1275-b7abc7a27d73
 # ╠═275a99c8-ee1e-11ea-0a76-93e3618c9588
 # ╠═42dfa206-ee1e-11ea-1fcd-21671042064c
 # ╟─6e53c2e6-ee1e-11ea-21bd-c9c05381be07
+# ╠═a66f87fa-e929-4946-96a8-cb442eb34116
 # ╠═e7f8b41a-ee25-11ea-287a-e75d33fbd98b
 # ╟─8a335044-ee19-11ea-0255-b9391246d231
-# ╠═7c50ea80-ee15-11ea-328f-6b4e4ff20b7e
+# ╟─7c50ea80-ee15-11ea-328f-6b4e4ff20b7e
 # ╠═aad67fd0-ee15-11ea-00d4-274ec3cda3a3
 # ╟─8ae59674-ee18-11ea-3815-f50713d0fa08
 # ╟─94c0798e-ee18-11ea-3212-1533753eabb6
