@@ -96,9 +96,6 @@ md"#### Exerise 1.1
 # ╔═╡ f51333a6-eded-11ea-34e6-bfbb3a69bcb0
 random_vect = rand(10) # replace this with your code!
 
-# ╔═╡ 91179467-2a60-423d-8b68-638fbd59f293
-?rand
-
 # ╔═╡ cf738088-eded-11ea-2915-61735c2aa990
 md"👉 Make a function `mean` using a `for` loop, which computes the mean/average of a vector of numbers."
 
@@ -329,6 +326,9 @@ invert(black)
 
 # ╔═╡ 4e21e0c4-ee0b-11ea-3d65-b311ae3f98e9
 red = RGB(0.8, 0.1, 0.1)
+
+# ╔═╡ ab93dbc0-10cd-41a2-9fda-8d4ec5e803fe
+typeof(red)
 
 # ╔═╡ 6dbf67ce-ee0b-11ea-3b71-abc05a64dc43
 invert(red)
@@ -845,7 +845,7 @@ md"""
 """
 
 # ╔═╡ 8b96e0bc-ee15-11ea-11cd-cfecea7075a0
-function convolve_image(M::AbstractMatrix, K::AbstractMatrix)
+function convolve_image_gray(M::AbstractMatrix, K::AbstractMatrix)
 	num_rows_m, num_cols_m = size(M)
 	num_rows_k, num_cols_k = size(K)
 	
@@ -874,6 +874,43 @@ function convolve_image(M::AbstractMatrix, K::AbstractMatrix)
 	return M3
 end
 
+# ╔═╡ 112a3d74-8528-4b59-9845-ccd59ce77352
+typeof(philip)
+
+# ╔═╡ a02646b8-4542-4134-be8b-609970ebd4ab
+function convolve_image(M::AbstractMatrix, K::AbstractMatrix)
+	num_rows_m, num_cols_m = size(M)
+	num_rows_k, num_cols_k = size(K)
+	
+	l = (num_rows_k - 1) ÷ 2
+	m = (num_cols_k - 1) ÷ 2
+	
+	M2 = [extend_mat(M, i, j) for (i,j) in
+			Iterators.product(1-l:num_rows_m+l,1-m:num_cols_m+m)]
+	
+	num_rows_m2, num_cols_m2 = size(M2)
+	
+	M3 = Array{RGB{Float64}}(undef,num_rows_m,num_cols_m)
+	
+	for x in (1+l):(num_rows_m2-l)
+		for y in (1+m):(num_cols_m2-m)
+			sum_r = 0.0
+			sum_b = 0.0
+			sum_g = 0.0
+			for w in 1:num_rows_k
+				for z in 1:num_cols_k
+					sum_r = sum_r + M2[x-(l+1)+w,y-(m+1)+z].r*K[w,z]
+					sum_g = sum_g + M2[x-(l+1)+w,y-(m+1)+z].g*K[w,z]
+					sum_b = sum_b + M2[x-(l+1)+w,y-(m+1)+z].b*K[w,z]
+				end
+			end
+			M3[x-l,y-m] = RGB(sum_r, sum_g, sum_b)
+		end
+	end
+	
+	return M3
+end
+
 # ╔═╡ 5a5135c6-ee1e-11ea-05dc-eb0c683c2ce5
 md"_Let's test it out! 🎃_"
 
@@ -888,7 +925,7 @@ K_test = [
 ]
 
 # ╔═╡ 42dfa206-ee1e-11ea-1fcd-21671042064c
-Gray.(convolve_image(small_image, K_test))
+Gray.(convolve_image_gray(small_image, K_test))
 
 # ╔═╡ 6e53c2e6-ee1e-11ea-21bd-c9c05381be07
 md"_Edit_ `K_test` _to create your own test case!_"
@@ -897,7 +934,13 @@ md"_Edit_ `K_test` _to create your own test case!_"
 Gray.(philip)
 
 # ╔═╡ e7f8b41a-ee25-11ea-287a-e75d33fbd98b
-Gray.(convolve_image(Gray.(philip), K_test))
+Gray.(convolve_image_gray(Gray.(philip), K_test))
+
+# ╔═╡ 8eb2ab4a-8731-421f-abd5-bff53f0b8fa7
+philip
+
+# ╔═╡ e8a3b0ee-a0e2-4fc9-a543-8abb87b1f52d
+convolve_image(philip, K_test)
 
 # ╔═╡ 8a335044-ee19-11ea-0255-b9391246d231
 md"""
@@ -918,14 +961,40 @@ Here, the 2D Gaussian kernel will be defined as
 $$G(x,y)=\frac{1}{2\pi \sigma^2}e^{\frac{-(x^2+y^2)}{2\sigma^2}}$$
 """
 
-# ╔═╡ aad67fd0-ee15-11ea-00d4-274ec3cda3a3
-function with_gaussian_blur(image)
+# ╔═╡ bd27c6aa-b807-400f-a78b-d7119a4515a8
+function gaussian_kernel_2D(n)
+	σ = 1
+	x = n^2
+			
+	gk = [exp(-((i^2)+(j^2))/(2*(σ^2)))/sqrt(2*π*(σ^2)) for (i,j) in
+					Iterators.product(-x:x,-x:x)]
 	
-	return missing
+	gk = gk/sum(gk)
+	
+	return gk
 end
+
+# ╔═╡ 809af829-ae65-4a80-9865-3980fe46030e
+gaussian_kernel_2D(2)
+
+# ╔═╡ 9048dc51-00d7-4a8e-84c4-5c59c98622ae
+sum((gaussian_kernel_2D(1)))
 
 # ╔═╡ 8ae59674-ee18-11ea-3815-f50713d0fa08
 md"_Let's make it interactive. 💫_"
+
+# ╔═╡ 347d2554-265a-477b-b1f8-0ee21068bba1
+@bind g2d_box Slider(0:1:100, show_value=true)
+
+# ╔═╡ aad67fd0-ee15-11ea-00d4-274ec3cda3a3
+function with_gaussian_blur_gray(image)
+	return convolve_image_gray(image, gaussian_kernel_2D(g2d_box))
+end
+
+# ╔═╡ 4e5256ac-ebcd-4adb-9185-cd2ed10a3d69
+function with_gaussian_blur(image)
+	return convolve_image(image, gaussian_kernel_2D(g2d_box))
+end
 
 # ╔═╡ 7c6642a6-ee15-11ea-0526-a1aac4286cdd
 md"""
@@ -970,10 +1039,27 @@ $$G_\text{total} = \sqrt{G_x^2 + G_y^2}.$$
 For simplicity you can choose one of the "channels" (colours) in the image to apply this to.
 """
 
+# ╔═╡ 2907b723-f5ff-4580-ab5e-6892f6b15653
+Gx = [1 0 -1; 2 0 -2; 1 0 -1]
+
+# ╔═╡ ecec9227-7578-4108-abd7-36ad820b07f9
+Gy = [1 2 1; 0 0 0; -1 -2 -1]
+
+# ╔═╡ dd4b3106-49bd-43cb-82d8-8a050d988455
+Gx^2
+
+# ╔═╡ 4dd82240-4ec3-4f01-9a80-349154fc6223
+G_total = (Gx^2 + Gy^2)
+
 # ╔═╡ 9eeb876c-ee15-11ea-1794-d3ea79f47b75
 function with_sobel_edge_detect(image)
+	Gx = [1 0 -1; 2 0 -2; 1 0 -1]
+	Gy = [1 2 1; 0 0 0; -1 -2 -1]
 	
-	return missing
+	G1 = convolve_image(image, Gx)
+	G2 = convolve_image(image, Gy)
+	
+	return G2
 end
 
 # ╔═╡ 1b85ee76-ee10-11ea-36d7-978340ef61e6
@@ -1538,11 +1624,20 @@ end
 # ╔═╡ f461f5f2-ee18-11ea-3d03-95f57f9bf09e
 gauss_camera_image = process_raw_camera_data(gauss_raw_camera_data);
 
-# ╔═╡ a75701c4-ee18-11ea-2863-d3042e71a68b
+# ╔═╡ 33403708-49e7-48f0-b9ea-115077a95ea6
+gauss_camera_image_gray = Gray.(gauss_camera_image)
+
+# ╔═╡ b7908d73-25de-4a46-8363-80a484cc5e11
+Gray.(with_gaussian_blur_gray(gauss_camera_image_gray))
+
+# ╔═╡ c8c0ff6c-2f80-4ecb-87f6-86dd1b199958
+gauss_camera_image
+
+# ╔═╡ 02c86920-348b-4cb3-9179-82c3d2fa3eb8
 with_gaussian_blur(gauss_camera_image)
 
 # ╔═╡ 1ff6b5cc-ee19-11ea-2ca8-7f00c204f587
-sobel_camera_image = Gray.(process_raw_camera_data(sobel_raw_camera_data));
+sobel_camera_image = process_raw_camera_data(sobel_raw_camera_data)
 
 # ╔═╡ 1bf94c00-ee19-11ea-0e3c-e12bc68d8e28
 with_sobel_edge_detect(sobel_camera_image)
@@ -1564,7 +1659,6 @@ with_sobel_edge_detect(sobel_camera_image)
 # ╠═f51333a6-eded-11ea-34e6-bfbb3a69bcb0
 # ╟─b18e2c54-edf1-11ea-0cbf-85946d64b6a2
 # ╟─397941fc-edee-11ea-33f2-5d46c759fbf7
-# ╠═91179467-2a60-423d-8b68-638fbd59f293
 # ╟─b1d5ca28-edf6-11ea-269e-75a9fb549f1d
 # ╟─cf738088-eded-11ea-2915-61735c2aa990
 # ╠═0ffa8354-edee-11ea-2883-9d5bfea4a236
@@ -1618,6 +1712,7 @@ with_sobel_edge_detect(sobel_camera_image)
 # ╟─2cc2f84e-ee0d-11ea-373b-e7ad3204bb00
 # ╟─b8f26960-ee0a-11ea-05b9-3f4bc1099050
 # ╠═5de3a22e-ee0b-11ea-230f-35df4ca3c96d
+# ╠═ab93dbc0-10cd-41a2-9fda-8d4ec5e803fe
 # ╠═4e21e0c4-ee0b-11ea-3d65-b311ae3f98e9
 # ╠═6dbf67ce-ee0b-11ea-3b71-abc05a64dc43
 # ╟─846b1330-ee0b-11ea-3579-7d90fafd7290
@@ -1684,7 +1779,7 @@ with_sobel_edge_detect(sobel_camera_image)
 # ╟─7ffd14f8-ee1d-11ea-0343-b54fb0333aea
 # ╟─80b7566a-ee09-11ea-3939-6fab470f9ec8
 # ╟─83544f2e-a74a-4468-b620-95a36387b112
-# ╟─1c8b4658-ee0c-11ea-2ede-9b9ed7d3125e
+# ╠═1c8b4658-ee0c-11ea-2ede-9b9ed7d3125e
 # ╟─f8bd22b8-ee14-11ea-04aa-ab16fd01826e
 # ╠═cff5a206-6cdb-4ce2-94f9-ca89b6810909
 # ╠═2a9dd06a-ee13-11ea-3f84-67bb309c77a8
@@ -1717,6 +1812,8 @@ with_sobel_edge_detect(sobel_camera_image)
 # ╟─3cd535e4-ee26-11ea-2482-fb4ad43dda19
 # ╟─7c41f0ca-ee15-11ea-05fb-d97a836659af
 # ╠═8b96e0bc-ee15-11ea-11cd-cfecea7075a0
+# ╠═112a3d74-8528-4b59-9845-ccd59ce77352
+# ╠═a02646b8-4542-4134-be8b-609970ebd4ab
 # ╟─0cabed84-ee1e-11ea-11c1-7d8a4b4ad1af
 # ╟─5a5135c6-ee1e-11ea-05dc-eb0c683c2ce5
 # ╠═577c6daa-ee1e-11ea-1275-b7abc7a27d73
@@ -1725,18 +1822,32 @@ with_sobel_edge_detect(sobel_camera_image)
 # ╟─6e53c2e6-ee1e-11ea-21bd-c9c05381be07
 # ╠═a66f87fa-e929-4946-96a8-cb442eb34116
 # ╠═e7f8b41a-ee25-11ea-287a-e75d33fbd98b
+# ╠═8eb2ab4a-8731-421f-abd5-bff53f0b8fa7
+# ╠═e8a3b0ee-a0e2-4fc9-a543-8abb87b1f52d
 # ╟─8a335044-ee19-11ea-0255-b9391246d231
 # ╟─7c50ea80-ee15-11ea-328f-6b4e4ff20b7e
+# ╠═bd27c6aa-b807-400f-a78b-d7119a4515a8
+# ╠═809af829-ae65-4a80-9865-3980fe46030e
+# ╠═9048dc51-00d7-4a8e-84c4-5c59c98622ae
 # ╠═aad67fd0-ee15-11ea-00d4-274ec3cda3a3
+# ╠═4e5256ac-ebcd-4adb-9185-cd2ed10a3d69
 # ╟─8ae59674-ee18-11ea-3815-f50713d0fa08
 # ╟─94c0798e-ee18-11ea-3212-1533753eabb6
-# ╠═a75701c4-ee18-11ea-2863-d3042e71a68b
-# ╟─f461f5f2-ee18-11ea-3d03-95f57f9bf09e
+# ╠═f461f5f2-ee18-11ea-3d03-95f57f9bf09e
+# ╠═33403708-49e7-48f0-b9ea-115077a95ea6
+# ╠═b7908d73-25de-4a46-8363-80a484cc5e11
+# ╠═347d2554-265a-477b-b1f8-0ee21068bba1
+# ╠═c8c0ff6c-2f80-4ecb-87f6-86dd1b199958
+# ╠═02c86920-348b-4cb3-9179-82c3d2fa3eb8
 # ╟─7c6642a6-ee15-11ea-0526-a1aac4286cdd
+# ╠═2907b723-f5ff-4580-ab5e-6892f6b15653
+# ╠═ecec9227-7578-4108-abd7-36ad820b07f9
+# ╠═dd4b3106-49bd-43cb-82d8-8a050d988455
+# ╠═4dd82240-4ec3-4f01-9a80-349154fc6223
 # ╠═9eeb876c-ee15-11ea-1794-d3ea79f47b75
 # ╟─1a0324de-ee19-11ea-1d4d-db37f4136ad3
 # ╠═1bf94c00-ee19-11ea-0e3c-e12bc68d8e28
-# ╟─1ff6b5cc-ee19-11ea-2ca8-7f00c204f587
+# ╠═1ff6b5cc-ee19-11ea-2ca8-7f00c204f587
 # ╟─0001f782-ee0e-11ea-1fb4-2b5ef3d241e2
 # ╠═1b85ee76-ee10-11ea-36d7-978340ef61e6
 # ╠═477d0a3c-ee10-11ea-11cf-07b0e0ce6818
