@@ -1,8 +1,17 @@
 ### A Pluto.jl notebook ###
-# v0.14.4
+# v0.14.8
 
 using Markdown
 using InteractiveUtils
+
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    quote
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : missing
+        el
+    end
+end
 
 # ╔═╡ 60ec8674-4aa1-4fb4-aaa2-91bf43caa392
 begin
@@ -27,8 +36,11 @@ md"""
 # Convolutions with various kernels
 """
 
+# ╔═╡ 1855256d-39e3-4cfd-8d5a-3f5fa849cd73
+@bind s_box Slider(0:1:100, show_value=true)
+
 # ╔═╡ 4c13d558-ee15-11ea-2ed9-c5fb90d93881
-kernel = Kernel.gaussian((10, 10))
+kernel = Kernel.gaussian((s_box, s_box))
 
 # ╔═╡ af27fb0f-b8c5-413a-8ab9-50583904229c
 kernel[0,0]
@@ -220,6 +232,7 @@ end
 # ╠═14d5b144-ee18-11ea-0080-c187f068c168
 # ╠═deca7295-c0a9-4115-a8d8-98381e69eea6
 # ╠═18045956-ee18-11ea-3e34-612133e2e39c
+# ╠═1855256d-39e3-4cfd-8d5a-3f5fa849cd73
 # ╠═5afed4ea-ee18-11ea-1aa4-abca154b3793
 # ╠═3b684067-7ba0-4ee9-b412-e066adfc5014
 # ╠═92407bf6-9e4c-4ab8-ab79-d981afb8f8cb

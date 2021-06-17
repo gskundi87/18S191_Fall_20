@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.11.10
+# v0.14.8
 
 using Markdown
 using InteractiveUtils
@@ -102,14 +102,13 @@ end
 brightness(c) = 0.3 * c.r + 0.59 * c.g + 0.11 * c.b
 
 # ╔═╡ 0ccf76e4-f0d9-11ea-07c9-0159e3d4d733
-@bind img_select Radio(["disc", "mario"], default="disc")
+@bind img_select Radio(["disc", "philip"], default="disc")
 
 # ╔═╡ 236dab08-f13d-11ea-1922-a3b82cfc7f51
 begin
-	url = "http://files.softicons.com/download/game-icons/super-mario-icons-by-sandro-pereira/png/32/Retro%20Mario.png"
 	img = Dict(
 		"disc" => disc(25),
-		"mario" => load(download(url))
+		"philip" => load("philip.jpg")
 	)[img_select]
 end
 
@@ -237,13 +236,13 @@ end
 # ╔═╡ Cell order:
 # ╠═15a4ba3e-f0d1-11ea-2ef1-5ff1dee8795f
 # ╠═1ab1c808-f0d1-11ea-03a7-e9854427d45f
-# ╟─21e744b8-f0d1-11ea-2e09-7ffbcdf43c37
+# ╠═21e744b8-f0d1-11ea-2e09-7ffbcdf43c37
 # ╠═10f850fc-f0d1-11ea-2a58-2326a9ea1e2a
-# ╟─7b4d5270-f0d3-11ea-0b48-79005f20602c
+# ╠═7b4d5270-f0d3-11ea-0b48-79005f20602c
 # ╠═6fd3b7a4-f0d3-11ea-1f26-fb9740cd16e0
 # ╟─fe3559e0-f13b-11ea-06c8-a314e44c20d6
 # ╟─b7ea8a28-f0d7-11ea-3e98-7b19a1f58304
-# ╟─0ccf76e4-f0d9-11ea-07c9-0159e3d4d733
+# ╠═0ccf76e4-f0d9-11ea-07c9-0159e3d4d733
 # ╟─236dab08-f13d-11ea-1922-a3b82cfc7f51
 # ╟─03434682-f13b-11ea-2b6e-11ad781e9a51
 # ╟─ca13597a-f168-11ea-1a2c-ff7b98b7b2c7

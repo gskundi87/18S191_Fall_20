@@ -963,28 +963,30 @@ $$G(x,y)=\frac{1}{2\pi \sigma^2}e^{\frac{-(x^2+y^2)}{2\sigma^2}}$$
 
 # ╔═╡ bd27c6aa-b807-400f-a78b-d7119a4515a8
 function gaussian_kernel_2D(n)
-	σ = 1
-	x = n^2
+	σ = 10
 			
-	gk = [exp(-((i^2)+(j^2))/(2*(σ^2)))/sqrt(2*π*(σ^2)) for (i,j) in
-					Iterators.product(-x:x,-x:x)]
+	gk = [exp(-((i^2)+(j^2))/(2*(σ^2))) * 1/sqrt(2*π*(σ^2)) for (i,j) in
+					Iterators.product(-n:n,-n:n)]
 	
-	gk = gk/sum(gk)
+	gk = gk./sum(gk)
 	
 	return gk
 end
 
-# ╔═╡ 809af829-ae65-4a80-9865-3980fe46030e
-gaussian_kernel_2D(2)
-
-# ╔═╡ 9048dc51-00d7-4a8e-84c4-5c59c98622ae
-sum((gaussian_kernel_2D(1)))
+# ╔═╡ 4a8236ed-8713-4280-9caf-13cef2b40814
+p = Kernel.gaussian((10,10))
 
 # ╔═╡ 8ae59674-ee18-11ea-3815-f50713d0fa08
 md"_Let's make it interactive. 💫_"
 
 # ╔═╡ 347d2554-265a-477b-b1f8-0ee21068bba1
 @bind g2d_box Slider(0:1:100, show_value=true)
+
+# ╔═╡ 809af829-ae65-4a80-9865-3980fe46030e
+gaussian_kernel_2D(g2d_box)
+
+# ╔═╡ 9048dc51-00d7-4a8e-84c4-5c59c98622ae
+sum((gaussian_kernel_2D(g2d_box)))
 
 # ╔═╡ aad67fd0-ee15-11ea-00d4-274ec3cda3a3
 function with_gaussian_blur_gray(image)
@@ -995,6 +997,9 @@ end
 function with_gaussian_blur(image)
 	return convolve_image(image, gaussian_kernel_2D(g2d_box))
 end
+
+# ╔═╡ 99bbf3b8-386d-4eb4-af7c-378c575573a4
+with_gaussian_blur(philip)
 
 # ╔═╡ 7c6642a6-ee15-11ea-0526-a1aac4286cdd
 md"""
@@ -1827,6 +1832,7 @@ with_sobel_edge_detect(sobel_camera_image)
 # ╟─8a335044-ee19-11ea-0255-b9391246d231
 # ╟─7c50ea80-ee15-11ea-328f-6b4e4ff20b7e
 # ╠═bd27c6aa-b807-400f-a78b-d7119a4515a8
+# ╠═4a8236ed-8713-4280-9caf-13cef2b40814
 # ╠═809af829-ae65-4a80-9865-3980fe46030e
 # ╠═9048dc51-00d7-4a8e-84c4-5c59c98622ae
 # ╠═aad67fd0-ee15-11ea-00d4-274ec3cda3a3
@@ -1837,8 +1843,9 @@ with_sobel_edge_detect(sobel_camera_image)
 # ╠═33403708-49e7-48f0-b9ea-115077a95ea6
 # ╠═b7908d73-25de-4a46-8363-80a484cc5e11
 # ╠═347d2554-265a-477b-b1f8-0ee21068bba1
-# ╠═c8c0ff6c-2f80-4ecb-87f6-86dd1b199958
-# ╠═02c86920-348b-4cb3-9179-82c3d2fa3eb8
+# ╟─c8c0ff6c-2f80-4ecb-87f6-86dd1b199958
+# ╟─02c86920-348b-4cb3-9179-82c3d2fa3eb8
+# ╠═99bbf3b8-386d-4eb4-af7c-378c575573a4
 # ╟─7c6642a6-ee15-11ea-0526-a1aac4286cdd
 # ╠═2907b723-f5ff-4580-ab5e-6892f6b15653
 # ╠═ecec9227-7578-4108-abd7-36ad820b07f9
