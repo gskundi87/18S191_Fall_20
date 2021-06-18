@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.8
+# v0.11.10
 
 using Markdown
 using InteractiveUtils
@@ -48,9 +48,6 @@ end
 # ╔═╡ af9a9c96-3803-11eb-1ec1-6315d95b164a
 sounds = wavread.(files)
 
-# ╔═╡ 63c6b9cd-8542-4e68-8eaf-4f5c637cb925
-plot(sounds[1][1])
-
 # ╔═╡ ffd94950-3803-11eb-36f9-93f943d7af8f
 signals = [sound[1][:, 1] for sound in sounds]
 
@@ -74,24 +71,6 @@ In this case, when we say \"frequency\", unless we rescale the x-axis it won't b
 
 # ╔═╡ 605fc966-3804-11eb-2aef-f1f934d49e36
 signal_ffts = fft.(signals)
-
-# ╔═╡ b8673675-4fa0-4eb0-8295-1882de8a96f9
-signal_ffts[1]
-
-# ╔═╡ 25df58fd-746c-4928-bdcc-b75e59d7e65a
-length(signal_ffts[1])
-
-# ╔═╡ 2d0c7a3e-1826-4ed4-b0df-4d2ccc6adbd5
-plot(
-	signal_ffts[5],
-	x_lims=(1, 1000)
-)
-
-# ╔═╡ 7b9bd009-4d3b-4fb2-8a25-af34f05591df
-plot(
-	abs.(signal_ffts[1]),
-	x_lims=(1, 1000)
-)
 
 # ╔═╡ a3aab82a-3804-11eb-3d2c-6f8e9eb9a12f
 plot(
@@ -151,12 +130,11 @@ isapprox(signal_dft, signal_fft)
 
 # ╔═╡ Cell order:
 # ╟─49d931b2-3761-11eb-1bc2-25a1d3b38eba
-# ╠═5248e43c-3761-11eb-1d42-bd8f8b9f19a7
+# ╟─5248e43c-3761-11eb-1d42-bd8f8b9f19a7
 # ╟─556bc8c6-3761-11eb-0609-059485893468
 # ╟─de377bcc-3971-11eb-1920-01ae73829171
 # ╠═6374807c-3761-11eb-03e6-0f45dd0fd4e4
 # ╠═af9a9c96-3803-11eb-1ec1-6315d95b164a
-# ╠═63c6b9cd-8542-4e68-8eaf-4f5c637cb925
 # ╠═ffd94950-3803-11eb-36f9-93f943d7af8f
 # ╟─d26c7384-396b-11eb-03f1-59108a815886
 # ╠═c6bf9c00-3803-11eb-12f6-87afda3aea9f
@@ -164,10 +142,6 @@ isapprox(signal_dft, signal_fft)
 # ╠═1140ee78-3804-11eb-34b5-6354d4db9642
 # ╟─2291650e-396c-11eb-26e4-b791a57b87e4
 # ╠═605fc966-3804-11eb-2aef-f1f934d49e36
-# ╠═b8673675-4fa0-4eb0-8295-1882de8a96f9
-# ╠═25df58fd-746c-4928-bdcc-b75e59d7e65a
-# ╠═2d0c7a3e-1826-4ed4-b0df-4d2ccc6adbd5
-# ╠═7b9bd009-4d3b-4fb2-8a25-af34f05591df
 # ╠═a3aab82a-3804-11eb-3d2c-6f8e9eb9a12f
 # ╠═a57789ae-3805-11eb-21fc-c7b776fa2627
 # ╟─66a98e40-3761-11eb-1b60-c1a3af8a062d
