@@ -28,6 +28,8 @@ begin
 	Pkg.add("Images")
 	Pkg.add("ImageMagick")
 	Pkg.add("ImageFiltering")
+	Pkg.add("OffsetArrays")
+	Pkg.add("LinearAlgebra")
 	
 	using Gadfly
 	using Images
@@ -38,6 +40,8 @@ begin
 	using PlutoUI
 	using ImageMagick
 	using ImageFiltering
+	using OffsetArrays
+	using LinearAlgebra
 end
 
 # ╔═╡ 10f850fc-f0d1-11ea-2a58-2326a9ea1e2a
@@ -202,7 +206,6 @@ end
 begin
 	Sy, Sx = Kernel.sobel()
 	show_colored_array(Sx)
-	Sx
 end
 
 # ╔═╡ 7864bd00-f146-11ea-0020-7fccb3913d8b
@@ -253,6 +256,77 @@ function pad(data, border = 1)
 	odata, collect(range)
 end
 
+# ╔═╡ 30c340e4-b0ab-4a78-ad1f-cd3ca40561da
+function extend_mat(M::AbstractMatrix, i, j)
+	num_rows, num_cols = size(M)
+	
+	if (i < 1)
+		if (j < 1)
+			return M[1,1]
+		elseif (1 <= j <= num_cols)
+			return M[1,j]
+		else
+			return M[1,num_cols]
+		end
+	elseif (1 <= i <= num_rows)
+		if (j < 1)
+			return M[i,1]
+		elseif (1 <= j <= num_cols)
+			return M[i,j]
+		else
+			return M[i,num_cols]
+		end
+	else
+		if (j < 1)
+			return M[num_rows,1]
+		elseif (1 <= j <= num_cols)
+			return M[num_rows,j]
+		else
+			return M[num_rows,num_cols]
+		end
+	end
+end
+
+# ╔═╡ 47f99a99-5de4-474c-8710-c813431a4268
+function pad_2(M,l)
+	num_rows_m, num_cols_m = size(M)
+	
+	M2 = [extend_mat(M, i, j) for (i,j) in
+			Iterators.product(1-l:num_rows_m+l,1-l:num_cols_m+l)]
+	
+	range = CartesianIndices(map(s->1+l:s+l, size(M)))
+	
+	M2, collect(range)
+end
+
+# ╔═╡ e97e1b91-8d9c-4b6f-b722-e7cf82d85260
+test = disc(25)
+
+# ╔═╡ b5811ff9-d4c7-44c7-9315-1cde666545e7
+test2 = load("julia_logo.png")
+
+# ╔═╡ a976a534-8dda-4879-94b2-4ea3e3dd61bf
+sizeSx = size(Sx,1) ÷ 2
+
+# ╔═╡ 3c086933-8991-4054-b9fd-e5be0fec9202
+padded, range = pad_2(test2,sizeSx)
+
+# ╔═╡ 0bfd5b47-5fa9-48e2-a249-edbf93e8d8fe
+padded_bright = brightness.(padded)
+
+# ╔═╡ 7739def6-96e3-4c86-98bf-5d253f0d1ebb
+Sx_n = [-0.125  0.0  0.125
+ -0.25   0.0  0.25
+ -0.125  0.0  0.125]
+
+# ╔═╡ 9f9b757e-ffb6-4911-9cd9-423af4834ef5
+Sy_n = [ -0.125  -0.25  -0.125
+  0.0     0.0    0.0
+  0.125   0.25   0.125]
+
+# ╔═╡ fb4acefa-6e02-40e6-a4be-938521ad0d98
+show_colored_array(convolve2D.(range,(padded_bright,),(Sy_n,)))
+
 # ╔═╡ Cell order:
 # ╠═15a4ba3e-f0d1-11ea-2ef1-5ff1dee8795f
 # ╠═21e744b8-f0d1-11ea-2e09-7ffbcdf43c37
@@ -266,7 +340,7 @@ end
 # ╟─03434682-f13b-11ea-2b6e-11ad781e9a51
 # ╠═ca13597a-f168-11ea-1a2c-ff7b98b7b2c7
 # ╠═f22aa34e-f0df-11ea-3053-3dcdc070ec2f
-# ╟─9232dcc8-f188-11ea-08fe-b787ea93c598
+# ╠═9232dcc8-f188-11ea-08fe-b787ea93c598
 # ╠═7864bd00-f146-11ea-0020-7fccb3913d8b
 # ╠═9d9cccb2-f118-11ea-1638-c76682e636b2
 # ╠═c821b906-f0d8-11ea-2df0-8f2d06964aa2
@@ -276,3 +350,13 @@ end
 # ╠═4f355629-2ccf-4e73-b374-34887c50cad1
 # ╠═b3b437e8-bc11-4e3e-8660-b0516efaa158
 # ╠═5f1fe6a3-952b-4b36-b58a-1a6642c8b62b
+# ╠═30c340e4-b0ab-4a78-ad1f-cd3ca40561da
+# ╠═47f99a99-5de4-474c-8710-c813431a4268
+# ╠═e97e1b91-8d9c-4b6f-b722-e7cf82d85260
+# ╠═b5811ff9-d4c7-44c7-9315-1cde666545e7
+# ╠═a976a534-8dda-4879-94b2-4ea3e3dd61bf
+# ╠═3c086933-8991-4054-b9fd-e5be0fec9202
+# ╠═0bfd5b47-5fa9-48e2-a249-edbf93e8d8fe
+# ╠═fb4acefa-6e02-40e6-a4be-938521ad0d98
+# ╠═7739def6-96e3-4c86-98bf-5d253f0d1ebb
+# ╠═9f9b757e-ffb6-4911-9cd9-423af4834ef5

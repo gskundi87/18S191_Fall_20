@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.11.12
+# v0.14.8
 
 using Markdown
 using InteractiveUtils
@@ -29,7 +29,9 @@ begin
 			"TestImages",
 			"Statistics",
 			"PlutoUI",
-			"BenchmarkTools"
+			"BenchmarkTools",
+			"Profile",
+			"ProfileSVG"
 			])
 
 	using Images
@@ -38,6 +40,8 @@ begin
 	using Statistics
 	using PlutoUI
 	using BenchmarkTools
+	using Profile
+	using ProfileSVG
 end
 
 # ╔═╡ e6b6760a-f37f-11ea-3ae1-65443ef5a81a
@@ -59,7 +63,7 @@ Feel free to ask questions!
 # ╔═╡ 33e43c7c-f381-11ea-3abc-c942327456b1
 # edit the code below to set your name and kerberos ID (i.e. email without @mit.edu)
 
-student = (name = "Jazzy Doe", kerberos_id = "jazz")
+student = (name = "p4u1", kerberos_id = "none")
 
 # you might need to wait until all other cells in this notebook have completed running. 
 # scroll around the page to see what's up
@@ -139,6 +143,15 @@ First, as an example, let's benchmark the `remove_in_each_row` function we defin
 # ╔═╡ e501ea28-f326-11ea-252a-53949fd9ef57
 performance_experiment_default = @benchmark remove_in_each_row(img, 1:size(img, 1))
 
+# ╔═╡ 848277bf-d055-49a9-9e37-30b5fe4f4d28
+@profile remove_in_each_row(img, 1:size(img, 1))
+
+# ╔═╡ a5daf1c1-ce9f-494d-ae46-5cf6a9aa8d45
+ProfileSVG.view(notext = false)
+
+# ╔═╡ 40cdbeb1-49ab-4fe4-856b-c201484a2a30
+ProfileSVG.save("prof.svg")
+
 # ╔═╡ f7915918-f366-11ea-2c46-2f4671ae8a22
 md"""
 #### Exercise 1.1
@@ -159,7 +172,8 @@ function remove_in_each_row_no_vcat(img, column_numbers)
 	for (i, j) in enumerate(column_numbers)
 		# EDIT THE FOLLOWING LINE and split it into two lines
 		# to avoid using `vcat`.
-		img′[i, :] .= vcat(img[i, 1:j-1], img[i, j+1:end])
+		img′[i, 1:j-1] = img[i, 1:j-1]
+		img′[i, j:end] = img[i, j+1:end]
 	end
 	img′
 end
@@ -181,7 +195,7 @@ md"""
 
 # ╔═╡ e49235a4-f367-11ea-3913-f54a4a6b2d6b
 no_vcat_observation = md"""
-<Your answer here>
+342
 """
 
 # ╔═╡ 837c43a4-f368-11ea-00a3-990a45cb0cbd
@@ -203,7 +217,8 @@ function remove_in_each_row_views(img, column_numbers)
 	for (i, j) in enumerate(column_numbers)
 		# EDIT THE FOLLOWING LINE and split it into two lines
 		# to avoid using `vcat`.
-		img′[i, :] .= vcat(img[i, 1:j-1], img[i, j+1:end])
+		img′[i, 1:j-1] = @view img[i, 1:j-1]
+		img′[i, j:end] = @view img[i, j+1:end]
 	end
 	img′
 end
@@ -238,7 +253,7 @@ Nice! If you did your optimizations right, you should be able to get down the es
 
 # ╔═╡ fd819dac-f368-11ea-33bb-17148387546a
 views_observation = md"""
-<your answer here>
+1026
 """
 
 # ╔═╡ 318a2256-f369-11ea-23a9-2f74c566549b
@@ -265,6 +280,17 @@ Gray.(brightness.(img))
 # ╔═╡ 0b9ead92-f318-11ea-3744-37150d649d43
 md"""We provide you with a convolve function below.
 """
+
+# ╔═╡ 969918dd-d04d-40dc-a493-0a989cdae937
+Sx, Sy = Kernel.sobel()
+
+# ╔═╡ 1b8d8e8a-52ed-4855-9fe1-b91ad838a573
+tempS = [ -0.12  -0.25  -0.125
+  0.0     0.0    0.0
+  0.125   0.25   0.125]
+
+# ╔═╡ ff170d52-036c-4bdb-9d37-e0b84099611e
+reflect(tempS)
 
 # ╔═╡ d184e9cc-f318-11ea-1a1e-994ab1330c1a
 convolve(img, k) = imfilter(img, reflect(k)) # uses ImageFiltering.jl package
@@ -330,9 +356,33 @@ random_seam(m, n, i) = reduce((a, b) -> [a..., clamp(last(a) + rand(-1:1), 1, n)
 
 # ╔═╡ abf20aa0-f31b-11ea-2548-9bea4fab4c37
 function greedy_seam(energies, starting_pixel::Int)
-	# you can delete the body of this function - it's just a placeholder.
-	random_seam(size(energies)..., starting_pixel)
+	row, col = size(energies)
+	M = Array{Int64,1}(undef,row)
+	M[1] = starting_pixel
+	temp_pixel = starting_pixel
+	for i in 2:row
+		min_value = energies[i,max(temp_pixel-1,1)]
+		min_index = max(temp_pixel-1,1)
+		if min_value > energies[i,temp_pixel]
+			min_value = energies[i,temp_pixel]
+			min_index = temp_pixel
+		end
+		if min_value > energies[i,min(temp_pixel+1,col)]
+			min_value = energies[i,temp_pixel+1]
+			min_index = min(temp_pixel+1,col)
+		end
+		M[i] = min_index
+		temp_pixel = min_index
+	end
+	M
+	#random_seam(size(energies)...,starting_pixel)
 end
+
+# ╔═╡ 2e39ad30-2692-449c-8ad7-9d7587e10d2c
+Array{Int64,1}(undef,10)
+
+# ╔═╡ c6e8d30a-79e0-431f-bf05-435434a153ce
+typeof([1 1 1 1])
 
 # ╔═╡ 5430d772-f397-11ea-2ed8-03ee06d02a22
 md"Before we apply your function to our test image, let's try it out on a small matrix of energies (displayed here in grayscale), just like in the lecture snippet above (clicking on the video will take you to the right part of the video). Light pixels have high energy, dark pixels signify low energy."
@@ -346,6 +396,12 @@ md"Before we apply your function to our test image, let's try it out on a small 
 
 # ╔═╡ 7ddee6fc-f394-11ea-31fc-5bd665a65bef
 greedy_test = Gray.(rand(Float64, (8,10)));
+
+# ╔═╡ 36317e6b-0d53-4376-a528-aa5851928976
+typeof(size(greedy_test))
+
+# ╔═╡ b0ff59e4-0103-439b-a415-692f84ad2dd5
+typeof(greedy_seam(greedy_test,1))
 
 # ╔═╡ 6f52c1a2-f395-11ea-0c8a-138a77f03803
 md"Starting pixel: $(@bind greedy_starting_pixel Slider(1:size(greedy_test, 2); show_value=true))"
@@ -640,17 +696,6 @@ if shrink_greedy
 	greedy_carved[greedy_n]
 end
 
-# ╔═╡ d88bc272-f392-11ea-0efd-15e0e2b2cd4e
-if shrink_recursive
-	recursive_carved = shrink_n(pika, 3, recursive_seam)
-	md"Shrink by: $(@bind recursive_n Slider(1:3, show_value=true))"
-end
-
-# ╔═╡ e66ef06a-f392-11ea-30ab-7160e7723a17
-if shrink_recursive
-	recursive_carved[recursive_n]
-end
-
 # ╔═╡ 4e3ef866-f3c5-11ea-3fb0-27d1ca9a9a3f
 if shrink_dict
 	dict_carved = shrink_n(img, 200, recursive_memoized_seam)
@@ -707,6 +752,17 @@ if compute_access
 	tracked = track_access(energy(pika))
 	least_energy(tracked, 1,7)
 	tracked.accesses[]
+end
+
+# ╔═╡ d88bc272-f392-11ea-0efd-15e0e2b2cd4e
+if shrink_recursive
+	recursive_carved = shrink_n(pika, 3, recursive_seam)
+	md"Shrink by: $(@bind recursive_n Slider(1:3, show_value=true))"
+end
+
+# ╔═╡ e66ef06a-f392-11ea-30ab-7160e7723a17
+if shrink_recursive
+	recursive_carved[recursive_n]
 end
 
 # ╔═╡ ffc17f40-f380-11ea-30ee-0fe8563c0eb1
@@ -806,8 +862,8 @@ end
 # ╔═╡ f010933c-f318-11ea-22c5-4d2e64cd9629
 begin
 	hbox(
-		float_to_color.(convolve(brightness.(img), Kernel.sobel()[1])),
-		float_to_color.(convolve(brightness.(img), Kernel.sobel()[2])))
+		float_to_color.((convolve(brightness.(img), Kernel.sobel()[1]))),
+		float_to_color.((convolve(brightness.(img), Kernel.sobel()[2]))))
 end
 
 # ╔═╡ 256edf66-f3e1-11ea-206e-4f9b4f6d3a3d
@@ -850,6 +906,9 @@ bigbreak
 # ╟─1d893998-f366-11ea-0828-512de0c44915
 # ╟─59991872-f366-11ea-1036-afe313fb4ec1
 # ╠═e501ea28-f326-11ea-252a-53949fd9ef57
+# ╠═848277bf-d055-49a9-9e37-30b5fe4f4d28
+# ╠═a5daf1c1-ce9f-494d-ae46-5cf6a9aa8d45
+# ╠═40cdbeb1-49ab-4fe4-856b-c201484a2a30
 # ╟─f7915918-f366-11ea-2c46-2f4671ae8a22
 # ╠═37d4ea5c-f327-11ea-2cc5-e3774c232c2b
 # ╠═67717d02-f327-11ea-0988-bfe661f57f77
@@ -874,6 +933,9 @@ bigbreak
 # ╠═6c7e4b54-f318-11ea-2055-d9f9c0199341
 # ╠═74059d04-f319-11ea-29b4-85f5f8f5c610
 # ╟─0b9ead92-f318-11ea-3744-37150d649d43
+# ╠═969918dd-d04d-40dc-a493-0a989cdae937
+# ╠═1b8d8e8a-52ed-4855-9fe1-b91ad838a573
+# ╠═ff170d52-036c-4bdb-9d37-e0b84099611e
 # ╠═d184e9cc-f318-11ea-1a1e-994ab1330c1a
 # ╠═cdfb3508-f319-11ea-1486-c5c58a0b9177
 # ╠═f010933c-f318-11ea-22c5-4d2e64cd9629
@@ -885,18 +947,22 @@ bigbreak
 # ╟─8ba9f5fc-f31b-11ea-00fe-79ecece09c25
 # ╟─f5a74dfc-f388-11ea-2577-b543d31576c6
 # ╟─c3543ea4-f393-11ea-39c8-37747f113b96
-# ╟─2f9cbea8-f3a1-11ea-20c6-01fd1464a592
+# ╠═2f9cbea8-f3a1-11ea-20c6-01fd1464a592
 # ╠═abf20aa0-f31b-11ea-2548-9bea4fab4c37
+# ╠═2e39ad30-2692-449c-8ad7-9d7587e10d2c
+# ╠═c6e8d30a-79e0-431f-bf05-435434a153ce
+# ╠═36317e6b-0d53-4376-a528-aa5851928976
+# ╠═b0ff59e4-0103-439b-a415-692f84ad2dd5
 # ╟─5430d772-f397-11ea-2ed8-03ee06d02a22
 # ╟─f580527e-f397-11ea-055f-bb9ea8f12015
-# ╟─6f52c1a2-f395-11ea-0c8a-138a77f03803
-# ╟─2a7e49b8-f395-11ea-0058-013e51baa554
-# ╟─7ddee6fc-f394-11ea-31fc-5bd665a65bef
-# ╟─980b1104-f394-11ea-0948-21002f26ee25
+# ╠═6f52c1a2-f395-11ea-0c8a-138a77f03803
+# ╠═2a7e49b8-f395-11ea-0058-013e51baa554
+# ╠═7ddee6fc-f394-11ea-31fc-5bd665a65bef
+# ╠═980b1104-f394-11ea-0948-21002f26ee25
 # ╟─9945ae78-f395-11ea-1d78-cf6ad19606c8
 # ╟─87efe4c2-f38d-11ea-39cc-bdfa11298317
-# ╟─f6571d86-f388-11ea-0390-05592acb9195
-# ╟─f626b222-f388-11ea-0d94-1736759b5f52
+# ╠═f6571d86-f388-11ea-0390-05592acb9195
+# ╠═f626b222-f388-11ea-0d94-1736759b5f52
 # ╟─52452d26-f36c-11ea-01a6-313114b4445d
 # ╠═2a98f268-f3b6-11ea-1eea-81c28256a19e
 # ╟─32e9a944-f3b6-11ea-0e82-1dff6c2eef8d
