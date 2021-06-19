@@ -360,6 +360,7 @@ function greedy_seam(energies, starting_pixel::Int)
 	M = Array{Int64,1}(undef,row)
 	M[1] = starting_pixel
 	temp_pixel = starting_pixel
+	
 	for i in 2:row
 		min_value = energies[i,max(temp_pixel-1,1)]
 		min_index = max(temp_pixel-1,1)
@@ -368,12 +369,13 @@ function greedy_seam(energies, starting_pixel::Int)
 			min_index = temp_pixel
 		end
 		if min_value > energies[i,min(temp_pixel+1,col)]
-			min_value = energies[i,temp_pixel+1]
+			min_value = energies[i,min(temp_pixel+1,col)]
 			min_index = min(temp_pixel+1,col)
 		end
 		M[i] = min_index
 		temp_pixel = min_index
 	end
+	
 	M
 	#random_seam(size(energies)...,starting_pixel)
 end
@@ -405,6 +407,9 @@ typeof(greedy_seam(greedy_test,1))
 
 # ╔═╡ 6f52c1a2-f395-11ea-0c8a-138a77f03803
 md"Starting pixel: $(@bind greedy_starting_pixel Slider(1:size(greedy_test, 2); show_value=true))"
+
+# ╔═╡ 28675f14-e4dc-42c9-a127-bfc09b40208b
+size(greedy_test,2)
 
 # ╔═╡ 9945ae78-f395-11ea-1d78-cf6ad19606c8
 md"_Let's try it on the bigger image!_"
@@ -460,13 +465,23 @@ Return these two values in a tuple.
 # ╔═╡ 8ec27ef8-f320-11ea-2573-c97b7b908cb7
 ## returns lowest possible sum energy at pixel (i, j), and the column to jump to in row i+1.
 function least_energy(energies, i, j)
-	# base case
-	# if i == something
-	#    return energies[...] # no need for recursive computation in the base case!
-	# end
-	#
-	# induction
-	# combine results from recursive calls to `least_energy`.
+	if i == size(energies,1)
+	    return (energies[i,j], 0)
+	end
+	
+	(a,b) = least_energy(energies,i+1,max(1,j-1))
+	(c,d) = least_energy(energies,i+1,j)
+	(e,f) = least_energy(energies,i+1,min(size(energies,2),j+1))
+	
+	if min(a,c,e) == a
+		return (energies[i,j] + a, max(1,j-1))
+	end
+	if min(a,c,e) == c
+		return (energies[i,j] + c, j)
+	end
+	if min(a,c,e) == e
+		return (energies[i,j] + e, min(size(energies,2),j+1))
+	end
 end
 
 # ╔═╡ a7f3d9f8-f3bb-11ea-0c1a-55bbb8408f09
@@ -504,8 +519,18 @@ This will give you the method used in the lecture to perform [exhaustive search 
 # ╔═╡ 85033040-f372-11ea-2c31-bb3147de3c0d
 function recursive_seam(energies, starting_pixel)
 	m, n = size(energies)
-	# Replace the following line with your code.
-	[rand(1:starting_pixel) for i=1:m]
+	M = Array{Int64,1}(undef,m)
+	M[1] = starting_pixel
+	temp_pixel = starting_pixel
+	
+	for i in 1:m-1
+		(a,b) = least_energy(energies, i, temp_pixel)
+		M[i+1] = b
+		temp_pixel = b
+	end
+	
+	M
+	#[rand(1:starting_pixel) for i=1:m]
 end
 
 # ╔═╡ 1d55333c-f393-11ea-229a-5b1e9cabea6a
@@ -744,6 +769,18 @@ end
 # Do not make this image bigger, it will be infeasible to compute.
 pika = decimate(load(download("https://art.pixilart.com/901d53bcda6b27b.png")),150)
 
+# ╔═╡ 9894feee-654d-46a2-9152-bc964665446f
+pika[1,2]
+
+# ╔═╡ a962cb15-cfc6-4084-ac96-ccdecfdc5737
+pika_energy = Gray.(energy(pika))
+
+# ╔═╡ 0aff6d9f-bff9-4546-a2b4-19db5ae3fead
+recursive_seam(pika_energy,8)
+
+# ╔═╡ 625d4eb7-6acd-4017-93f3-8990c3f00ef1
+md"Starting pixel: $(@bind recursive_starting_pixel Slider(1:size(pika_energy, 2); show_value=true))"
+
 # ╔═╡ 73b52fd6-f3b9-11ea-14ed-ebfcab1ce6aa
 size(pika)
 
@@ -756,14 +793,17 @@ end
 
 # ╔═╡ d88bc272-f392-11ea-0efd-15e0e2b2cd4e
 if shrink_recursive
-	recursive_carved = shrink_n(pika, 3, recursive_seam)
-	md"Shrink by: $(@bind recursive_n Slider(1:3, show_value=true))"
+	recursive_carved = shrink_n(pika, 8, recursive_seam)
+	md"Shrink by: $(@bind recursive_n Slider(1:8, show_value=true))"
 end
 
 # ╔═╡ e66ef06a-f392-11ea-30ab-7160e7723a17
 if shrink_recursive
 	recursive_carved[recursive_n]
 end
+
+# ╔═╡ 1eb7f50e-0358-49db-a923-a9aedc47eb32
+size(recursive_carved[recursive_n])
 
 # ╔═╡ ffc17f40-f380-11ea-30ee-0fe8563c0eb1
 hint(text) = Markdown.MD(Markdown.Admonition("hint", "Hint", [text]))
@@ -800,6 +840,9 @@ end;
 
 # ╔═╡ 2a7e49b8-f395-11ea-0058-013e51baa554
 visualize_seam_algorithm(greedy_seam, greedy_test, greedy_starting_pixel)
+
+# ╔═╡ ba0a732b-0406-4f8e-b148-bd2195738705
+visualize_seam_algorithm(recursive_seam, pika_energy, recursive_starting_pixel)
 
 # ╔═╡ ffe326e0-f380-11ea-3619-61dd0592d409
 yays = [md"Great!", md"Yay ❤", md"Great! 🎉", md"Well done!", md"Keep it up!", md"Good job!", md"Awesome!", md"You got the right answer!", md"Let's move on to the next section."]
@@ -958,9 +1001,10 @@ bigbreak
 # ╠═6f52c1a2-f395-11ea-0c8a-138a77f03803
 # ╠═2a7e49b8-f395-11ea-0058-013e51baa554
 # ╠═7ddee6fc-f394-11ea-31fc-5bd665a65bef
+# ╠═28675f14-e4dc-42c9-a127-bfc09b40208b
 # ╠═980b1104-f394-11ea-0948-21002f26ee25
 # ╟─9945ae78-f395-11ea-1d78-cf6ad19606c8
-# ╟─87efe4c2-f38d-11ea-39cc-bdfa11298317
+# ╠═87efe4c2-f38d-11ea-39cc-bdfa11298317
 # ╠═f6571d86-f388-11ea-0390-05592acb9195
 # ╠═f626b222-f388-11ea-0d94-1736759b5f52
 # ╟─52452d26-f36c-11ea-01a6-313114b4445d
@@ -968,6 +1012,8 @@ bigbreak
 # ╟─32e9a944-f3b6-11ea-0e82-1dff6c2eef8d
 # ╟─9101d5a0-f371-11ea-1c04-f3f43b96ca4a
 # ╠═ddba07dc-f3b7-11ea-353e-0f67713727fc
+# ╠═9894feee-654d-46a2-9152-bc964665446f
+# ╠═a962cb15-cfc6-4084-ac96-ccdecfdc5737
 # ╠═73b52fd6-f3b9-11ea-14ed-ebfcab1ce6aa
 # ╠═8ec27ef8-f320-11ea-2573-c97b7b908cb7
 # ╟─9f18efe2-f38e-11ea-0871-6d7760d0b2f6
@@ -977,12 +1023,16 @@ bigbreak
 # ╟─cbf29020-f3ba-11ea-2cb0-b92836f3d04b
 # ╟─8bc930f0-f372-11ea-06cb-79ced2834720
 # ╠═85033040-f372-11ea-2c31-bb3147de3c0d
+# ╠═0aff6d9f-bff9-4546-a2b4-19db5ae3fead
 # ╠═1d55333c-f393-11ea-229a-5b1e9cabea6a
 # ╠═d88bc272-f392-11ea-0efd-15e0e2b2cd4e
 # ╠═e66ef06a-f392-11ea-30ab-7160e7723a17
+# ╠═1eb7f50e-0358-49db-a923-a9aedc47eb32
+# ╠═625d4eb7-6acd-4017-93f3-8990c3f00ef1
+# ╠═ba0a732b-0406-4f8e-b148-bd2195738705
 # ╟─c572f6ce-f372-11ea-3c9a-e3a21384edca
 # ╠═6d993a5c-f373-11ea-0dde-c94e3bbd1552
-# ╠═ea417c2a-f373-11ea-3bb0-b1b5754f2fac
+# ╟─ea417c2a-f373-11ea-3bb0-b1b5754f2fac
 # ╟─56a7f954-f374-11ea-0391-f79b75195f4d
 # ╠═b1d09bc8-f320-11ea-26bb-0101c9a204e2
 # ╠═3e8b0868-f3bd-11ea-0c15-011bbd6ac051
