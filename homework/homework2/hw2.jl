@@ -82,6 +82,12 @@ md"_Let's create a package environment:_"
 #img = load(download("https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Hilma_af_Klint_-_Group_IX_SUW%2C_The_Swan_No._1_%2813947%29.jpg/477px-Hilma_af_Klint_-_Group_IX_SUW%2C_The_Swan_No._1_%2813947%29.jpg"))
 img = load(download("https://i.imgur.com/4SRnmkj.png"))
 
+# ╔═╡ db09f0c5-ef0a-4e9e-9a0f-d06545dde6d9
+save("img.jpg",img)
+
+# ╔═╡ 20d6d229-abcd-4c8e-aaf6-288296de2cf6
+size(img)
+
 # ╔═╡ cc9fcdae-f314-11ea-1b9a-1f68b792f005
 md"""
 # Arrays: Slices and views
@@ -270,8 +276,8 @@ You should use this function whenever the problem set asks you to deal with _bri
 
 # ╔═╡ 6c7e4b54-f318-11ea-2055-d9f9c0199341
 begin
-	brightness(c::RGB) = mean((c.r, c.g, c.b))
-	brightness(c::RGBA) = mean((c.r, c.g, c.b))
+	brightness(c::RGB) = 2 * mean((c.r, c.g, c.b))
+	brightness(c::RGBA) = 2 * mean((c.r, c.g, c.b))
 end
 
 # ╔═╡ 74059d04-f319-11ea-29b4-85f5f8f5c610
@@ -308,6 +314,7 @@ finally we define the `energy` function which takes the Sobel gradients along x 
 # ╔═╡ 6f37b34c-f31a-11ea-2909-4f2079bf66ec
 begin
 	energy(∇x, ∇y) = sqrt.(∇x.^2 .+ ∇y.^2)
+	
 	function energy(img)
 		∇y = convolve(brightness.(img), Kernel.sobel()[1])
 		∇x = convolve(brightness.(img), Kernel.sobel()[2])
@@ -397,10 +404,7 @@ md"Before we apply your function to our test image, let's try it out on a small 
 # catch end
 
 # ╔═╡ 7ddee6fc-f394-11ea-31fc-5bd665a65bef
-greedy_test = Gray.(rand(Float64, (8,10)));
-
-# ╔═╡ 36317e6b-0d53-4376-a528-aa5851928976
-typeof(size(greedy_test))
+greedy_test = Gray.(rand(Float64, (8,10)))
 
 # ╔═╡ b0ff59e4-0103-439b-a415-692f84ad2dd5
 typeof(greedy_seam(greedy_test,1))
@@ -408,14 +412,14 @@ typeof(greedy_seam(greedy_test,1))
 # ╔═╡ 6f52c1a2-f395-11ea-0c8a-138a77f03803
 md"Starting pixel: $(@bind greedy_starting_pixel Slider(1:size(greedy_test, 2); show_value=true))"
 
-# ╔═╡ 28675f14-e4dc-42c9-a127-bfc09b40208b
-size(greedy_test,2)
-
 # ╔═╡ 9945ae78-f395-11ea-1d78-cf6ad19606c8
 md"_Let's try it on the bigger image!_"
 
 # ╔═╡ 87efe4c2-f38d-11ea-39cc-bdfa11298317
 md"Compute shrunk image: $(@bind shrink_greedy CheckBox())"
+
+# ╔═╡ b4fb6f82-5ee5-43a4-a030-3b4f07c93ee6
+
 
 # ╔═╡ 52452d26-f36c-11ea-01a6-313114b4445d
 md"""
@@ -536,6 +540,15 @@ end
 # ╔═╡ 1d55333c-f393-11ea-229a-5b1e9cabea6a
 md"Compute shrunk image: $(@bind shrink_recursive CheckBox())"
 
+# ╔═╡ f107471d-d3fc-4ba6-a9be-8e15c330a28a
+md"Starting pixel: $(@bind recursive_starting_pixel Slider(1:8; show_value=true))"
+
+# ╔═╡ 6fbe3e1f-8700-4108-958f-84cd28af7aa2
+recursive_test = Gray.(rand(Float64, (10,10)))
+
+# ╔═╡ 80f04ccc-de7a-4788-879e-948b5635ca12
+md"Starting pixel: $(@bind recursive_starting_pixel_2 Slider(1:50; show_value=true))"
+
 # ╔═╡ c572f6ce-f372-11ea-3c9a-e3a21384edca
 md"""
 #### Exercise 2.4
@@ -581,21 +594,56 @@ You are expected to read and understand the [documentation on dictionaries](http
 
 # ╔═╡ b1d09bc8-f320-11ea-26bb-0101c9a204e2
 function memoized_least_energy(energies, i, j, memory)
-	m, n = size(energies)
+	if haskey(memory, (i,j)) == 1
+		return memory[(i,j)]
+	end
 	
-	# Replace the following line with your code.
-	[starting_pixel for i=1:m]
+	m, n = size(energies)
+
+	if i == m
+		memory[(i,j)] = (energies[i,j], 0)
+	    return memory[(i,j)]
+	end
+	
+	(a,b) = memoized_least_energy(energies,i+1,max(1,j-1),memory)
+	(c,d) = memoized_least_energy(energies,i+1,j,memory)
+	(e,f) = memoized_least_energy(energies,i+1,min(n,j+1),memory)
+	
+	if min(a,c,e) == a
+		memory[(i,j)] = (energies[i,j] + a, max(1,j-1))
+		return memory[(i,j)]
+	end
+	if min(a,c,e) == c
+		memory[(i,j)] = (energies[i,j] + c, j)
+		return memory[(i,j)]
+	end
+	if min(a,c,e) == e
+		memory[(i,j)] = (energies[i,j] + e, min(n,j+1))
+		return memory[(i,j)]
+	end
 end
 
 # ╔═╡ 3e8b0868-f3bd-11ea-0c15-011bbd6ac051
 function recursive_memoized_seam(energies, starting_pixel)
-	memory = Dict{Tuple{Int,Int}, Float64}() # location => least energy.
+	memory = Dict{Tuple{Int,Int}, Tuple{Float64,Int}}() # location => least energy.
 	                                         # pass this every time you call memoized_least_energy.
-	m, n = size(energies)
 	
-	# Replace the following line with your code.
-	[rand(1:starting_pixel) for i=1:m]
+	m, n = size(energies)
+	M = Array{Int64,1}(undef,m)
+	M[1] = starting_pixel
+	temp_pixel = starting_pixel
+	memoized_least_energy(energies,1,starting_pixel,memory)
+	
+	for i in 1:m-1
+		M[i+1] = memory[(i,temp_pixel)][2]
+		temp_pixel = M[i+1]
+	end
+	
+	M
 end
+
+# ╔═╡ 79961867-2b9b-4679-a823-19faaaab5d5f
+recursive_memoized_seam(recursive_test,recursive_starting_pixel_2)
 
 # ╔═╡ 4e3bcf88-f3c5-11ea-3ada-2ff9213647b7
 md"Compute shrunk image: $(@bind shrink_dict CheckBox())"
@@ -778,12 +826,6 @@ pika_energy = Gray.(energy(pika))
 # ╔═╡ 0aff6d9f-bff9-4546-a2b4-19db5ae3fead
 recursive_seam(pika_energy,8)
 
-# ╔═╡ 625d4eb7-6acd-4017-93f3-8990c3f00ef1
-md"Starting pixel: $(@bind recursive_starting_pixel Slider(1:size(pika_energy, 2); show_value=true))"
-
-# ╔═╡ 73b52fd6-f3b9-11ea-14ed-ebfcab1ce6aa
-size(pika)
-
 # ╔═╡ fa8e2772-f3b6-11ea-30f7-699717693164
 if compute_access
 	tracked = track_access(energy(pika))
@@ -791,10 +833,19 @@ if compute_access
 	tracked.accesses[]
 end
 
+# ╔═╡ 9650602f-fb3f-43b9-b822-69822a41173e
+pika_2 = decimate(load(download("https://art.pixilart.com/901d53bcda6b27b.png")),15)
+
+# ╔═╡ 14a1806b-a857-48d0-8a80-6d6ee8c0fa5a
+size(pika_2)
+
+# ╔═╡ 73b52fd6-f3b9-11ea-14ed-ebfcab1ce6aa
+size(pika_2)
+
 # ╔═╡ d88bc272-f392-11ea-0efd-15e0e2b2cd4e
 if shrink_recursive
-	recursive_carved = shrink_n(pika, 8, recursive_seam)
-	md"Shrink by: $(@bind recursive_n Slider(1:8, show_value=true))"
+	recursive_carved = shrink_n(pika_2, 75, recursive_memoized_seam)
+	md"Shrink by: $(@bind recursive_n Slider(1:75, show_value=true))"
 end
 
 # ╔═╡ e66ef06a-f392-11ea-30ab-7160e7723a17
@@ -843,6 +894,9 @@ visualize_seam_algorithm(greedy_seam, greedy_test, greedy_starting_pixel)
 
 # ╔═╡ ba0a732b-0406-4f8e-b148-bd2195738705
 visualize_seam_algorithm(recursive_seam, pika_energy, recursive_starting_pixel)
+
+# ╔═╡ e3dfe799-f26a-4b85-9fb3-7f8d9f842b72
+visualize_seam_algorithm(recursive_memoized_seam, recursive_test,recursive_starting_pixel_2)
 
 # ╔═╡ ffe326e0-f380-11ea-3619-61dd0592d409
 yays = [md"Great!", md"Yay ❤", md"Great! 🎉", md"Well done!", md"Keep it up!", md"Good job!", md"Awesome!", md"You got the right answer!", md"Let's move on to the next section."]
@@ -939,6 +993,8 @@ bigbreak
 # ╠═86e1ee96-f314-11ea-03f6-0f549b79e7c9
 # ╠═a4937996-f314-11ea-2ff9-615c888afaa8
 # ╠═0d144802-f319-11ea-0028-cd97a776a3d0
+# ╠═db09f0c5-ef0a-4e9e-9a0f-d06545dde6d9
+# ╠═20d6d229-abcd-4c8e-aaf6-288296de2cf6
 # ╟─cc9fcdae-f314-11ea-1b9a-1f68b792f005
 # ╟─b49a21a6-f381-11ea-1a98-7f144c55c9b7
 # ╟─b49e8cc8-f381-11ea-1056-91668ac6ae4e
@@ -994,24 +1050,25 @@ bigbreak
 # ╠═abf20aa0-f31b-11ea-2548-9bea4fab4c37
 # ╠═2e39ad30-2692-449c-8ad7-9d7587e10d2c
 # ╠═c6e8d30a-79e0-431f-bf05-435434a153ce
-# ╠═36317e6b-0d53-4376-a528-aa5851928976
 # ╠═b0ff59e4-0103-439b-a415-692f84ad2dd5
 # ╟─5430d772-f397-11ea-2ed8-03ee06d02a22
 # ╟─f580527e-f397-11ea-055f-bb9ea8f12015
 # ╠═6f52c1a2-f395-11ea-0c8a-138a77f03803
 # ╠═2a7e49b8-f395-11ea-0058-013e51baa554
 # ╠═7ddee6fc-f394-11ea-31fc-5bd665a65bef
-# ╠═28675f14-e4dc-42c9-a127-bfc09b40208b
 # ╠═980b1104-f394-11ea-0948-21002f26ee25
 # ╟─9945ae78-f395-11ea-1d78-cf6ad19606c8
 # ╠═87efe4c2-f38d-11ea-39cc-bdfa11298317
 # ╠═f6571d86-f388-11ea-0390-05592acb9195
 # ╠═f626b222-f388-11ea-0d94-1736759b5f52
+# ╠═b4fb6f82-5ee5-43a4-a030-3b4f07c93ee6
 # ╟─52452d26-f36c-11ea-01a6-313114b4445d
 # ╠═2a98f268-f3b6-11ea-1eea-81c28256a19e
 # ╟─32e9a944-f3b6-11ea-0e82-1dff6c2eef8d
 # ╟─9101d5a0-f371-11ea-1c04-f3f43b96ca4a
 # ╠═ddba07dc-f3b7-11ea-353e-0f67713727fc
+# ╠═9650602f-fb3f-43b9-b822-69822a41173e
+# ╠═14a1806b-a857-48d0-8a80-6d6ee8c0fa5a
 # ╠═9894feee-654d-46a2-9152-bc964665446f
 # ╠═a962cb15-cfc6-4084-ac96-ccdecfdc5737
 # ╠═73b52fd6-f3b9-11ea-14ed-ebfcab1ce6aa
@@ -1027,9 +1084,13 @@ bigbreak
 # ╠═1d55333c-f393-11ea-229a-5b1e9cabea6a
 # ╠═d88bc272-f392-11ea-0efd-15e0e2b2cd4e
 # ╠═e66ef06a-f392-11ea-30ab-7160e7723a17
+# ╠═f107471d-d3fc-4ba6-a9be-8e15c330a28a
 # ╠═1eb7f50e-0358-49db-a923-a9aedc47eb32
-# ╠═625d4eb7-6acd-4017-93f3-8990c3f00ef1
 # ╠═ba0a732b-0406-4f8e-b148-bd2195738705
+# ╠═6fbe3e1f-8700-4108-958f-84cd28af7aa2
+# ╠═e3dfe799-f26a-4b85-9fb3-7f8d9f842b72
+# ╠═80f04ccc-de7a-4788-879e-948b5635ca12
+# ╠═79961867-2b9b-4679-a823-19faaaab5d5f
 # ╟─c572f6ce-f372-11ea-3c9a-e3a21384edca
 # ╠═6d993a5c-f373-11ea-0dde-c94e3bbd1552
 # ╟─ea417c2a-f373-11ea-3bb0-b1b5754f2fac
@@ -1058,8 +1119,8 @@ bigbreak
 # ╟─0fbe2af6-f381-11ea-2f41-23cd1cf930d9
 # ╟─48089a00-f321-11ea-1479-e74ba71df067
 # ╟─6b4d6584-f3be-11ea-131d-e5bdefcc791b
-# ╟─437ba6ce-f37d-11ea-1010-5f6a6e282f9b
-# ╟─ef88c388-f388-11ea-3828-ff4db4d1874e
+# ╠═437ba6ce-f37d-11ea-1010-5f6a6e282f9b
+# ╠═ef88c388-f388-11ea-3828-ff4db4d1874e
 # ╟─ef26374a-f388-11ea-0b4e-67314a9a9094
 # ╟─6bdbcf4c-f321-11ea-0288-fb16ff1ec526
 # ╟─ffc17f40-f380-11ea-30ee-0fe8563c0eb1
@@ -1069,6 +1130,6 @@ bigbreak
 # ╟─ffe326e0-f380-11ea-3619-61dd0592d409
 # ╟─fff5aedc-f380-11ea-2a08-99c230f8fa32
 # ╟─00026442-f381-11ea-2b41-bde1fff66011
-# ╟─fbf6b0fa-f3e0-11ea-2009-573a218e2460
-# ╟─256edf66-f3e1-11ea-206e-4f9b4f6d3a3d
+# ╠═fbf6b0fa-f3e0-11ea-2009-573a218e2460
+# ╠═256edf66-f3e1-11ea-206e-4f9b4f6d3a3d
 # ╟─00115b6e-f381-11ea-0bc6-61ca119cb628
