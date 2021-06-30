@@ -367,6 +367,9 @@ carved, marked_carved = shrink_n(img, n_examples);
 # ╔═╡ 2d6c6820-ef2d-11ea-1704-49bb5188cfcc
 md"shrunk by $n:"
 
+# ╔═╡ a3929fec-8322-443c-8544-58cf6b871483
+size(img)
+
 # ╔═╡ 1fd26a60-f089-11ea-1f56-bb6eba7d9651
 function hbox(x, y, gap=16; sy=size(y), sx=size(x))
 	w,h = (max(sx[1], sy[1]),
@@ -478,7 +481,8 @@ end
 # ╠═b1b6b7fc-f153-11ea-224a-2578e8298775
 # ╠═2eb459d4-ef36-11ea-1f74-b53ffec7a1ed
 # ╠═7038abe4-ef36-11ea-11a5-75e57ab51032
-# ╟─2d6c6820-ef2d-11ea-1704-49bb5188cfcc
+# ╠═2d6c6820-ef2d-11ea-1704-49bb5188cfcc
+# ╠═a3929fec-8322-443c-8544-58cf6b871483
 # ╠═fa6a2152-ef0f-11ea-0e67-0d1a6599e779
 # ╟─71b16dbe-f08b-11ea-2343-5f1583074029
 # ╟─1fd26a60-f089-11ea-1f56-bb6eba7d9651
