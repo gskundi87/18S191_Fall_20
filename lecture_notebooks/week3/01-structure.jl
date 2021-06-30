@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.11.12
+# v0.14.8
 
 using Markdown
 using InteractiveUtils
@@ -15,6 +15,9 @@ end
 
 # ╔═╡ ae24c8b2-f60b-11ea-2c7a-03857d1217b2
 using Pkg
+
+# ╔═╡ b5177f70-f60b-11ea-14a9-f5a574cc5185
+Pkg.activate(mktempdir())
 
 # ╔═╡ bc14fc1a-f60b-11ea-207a-91b967f28076
 begin
@@ -44,9 +47,6 @@ ADD A HINT BOX HERE WITH THE ANSWER "STRUCTURE" """
 md"One-hot vectors:  Numbers and images
 
 0s and 1s and colors"
-
-# ╔═╡ b5177f70-f60b-11ea-14a9-f5a574cc5185
-Pkg.activate(mktempdir())
 
 # ╔═╡ ef8f44b2-f5fc-11ea-1e4d-bd873cd39d6c
 @bind nn Slider(1:20, show_value=true)
