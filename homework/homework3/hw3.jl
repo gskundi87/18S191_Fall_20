@@ -300,10 +300,10 @@ function rand_sample_letter(frequencies)
 	alphabet[rand_sample(frequencies)]
 end
 
-# ╔═╡ 318ed90e-d375-4c71-9a11-3bca7142cfbf
-h = string("readread")
+# ╔═╡ bb78ff93-78d0-4a08-9575-e6e40d84b8c4
+h = "readread"
 
-# ╔═╡ b6924c2b-ee93-4609-948f-ab83e4883ed2
+# ╔═╡ 84217329-3452-4811-8ee3-838fac150885
 typeof(h)
 
 # ╔═╡ fbb7c04e-f92d-11ea-0b81-0be20da242c8
@@ -313,7 +313,7 @@ function transition_counts(cleaned_sample)
 			b in alphabet]
 end
 
-# ╔═╡ 4e4b6f7f-a8bd-471e-bbc3-e28078aa1e87
+# ╔═╡ 9101c88a-a77e-4f69-b8a8-dd9d9b30821a
 transition_counts(h)
 
 # ╔═╡ 80118bf8-f931-11ea-34f3-b7828113ffd8
@@ -436,6 +436,11 @@ function sample_text(A, n)
 	String(alphabet[indices])
 end
 
+# ╔═╡ bd0481f4-fdc5-44f4-b809-c689986d9680
+map(1:10, 11:20) do x, y
+    x + y
+end
+
 # ╔═╡ 141af892-f933-11ea-1e5f-154167642809
 md"""
 It looks like we have a decent language model, in the sense that it understands _transition frequencies_ in the language. In the demo above, try switching the language between $(join(string.(fieldnames(typeof(samples))), " and ")) -- the generated text clearly looks more like one or the other, demonstrating that the model can capture differences between the two languages. What's remarkable is that our "training data" was just a single paragraph per language.
@@ -480,8 +485,17 @@ The only question left is: How do we compare two matrices? When two matrices are
 
 # ╔═╡ 13c89272-f934-11ea-07fe-91b5d56dedf8
 function matrix_distance(A, B)
-	missing # do something with A .- B
+	sum(abs.(A .- B)) # do something with A .- B
 end
+
+# ╔═╡ 909019f6-736f-4285-9aee-48921a28cdf9
+samples[1]
+
+# ╔═╡ 6e287e5e-c5de-41ad-bb56-6c3620cca3e8
+samples[2]
+
+# ╔═╡ c456d387-cc0e-4a96-ac74-26a99a3f9697
+typeof(samples)
 
 # ╔═╡ 7d60f056-f931-11ea-39ae-5fa18a955a77
 distances = map(samples) do sample
@@ -517,6 +531,9 @@ This also means that we are going to need a larger dataset to train our model on
 We will train our model on the novel [_Emma_ (1815), by Jane Austen](https://en.wikipedia.org/wiki/Emma_(novel)). This work is in the public domain, which means that we can download the whole book as a text file from `archive.org`. We've done the process of downloading and cleaning already, and we have split the text into word and punctuation tokens.
 """
 
+# ╔═╡ 02e23272-cdc8-46ef-89b1-49ccc8d24758
+raw_text = read(download("https://ia800303.us.archive.org/24/items/EmmaJaneAusten_753/emma_pdf_djvu.txt"), String)
+
 # ╔═╡ b7601048-fb57-11ea-0754-97dc4e0623a1
 emma = let
 	raw_text = read(download("https://ia800303.us.archive.org/24/items/EmmaJaneAusten_753/emma_pdf_djvu.txt"), String)
@@ -528,6 +545,11 @@ emma = let
 	
 	raw_text[start_index:stop_index]
 end;
+
+# ╔═╡ 456f65b9-3705-4ea3-80e0-6ab820d28619
+open("Emma.txt", "w") do file
+    write(file, emma)
+end
 
 # ╔═╡ cc42de82-fb5a-11ea-3614-25ef961729ab
 function splitwords(text)
@@ -543,6 +565,9 @@ emma_words = splitwords(emma)
 
 # ╔═╡ 4ca8e04a-fb75-11ea-08cc-2fdef5b31944
 forest_words = splitwords(samples.English)
+
+# ╔═╡ 4adfb73b-b592-474c-97da-fb2b45d66ce6
+size(forest_words)
 
 # ╔═╡ 6f613cd2-fb5b-11ea-1669-cbd355677649
 md"""
@@ -596,7 +621,9 @@ ngrams([1, 2, 3, 42], 2) == bigrams([1, 2, 3, 42])
 
 # ╔═╡ 7be98e04-fb6b-11ea-111d-51c48f39a4e9
 function ngrams(words, n)
-	missing
+	map(1:length(words)-n+1) do i
+		words[i:i+n-1]
+	end
 end
 
 # ╔═╡ 052f822c-fb7b-11ea-382f-af4d6c2b4fdb
@@ -637,7 +664,7 @@ Julia's [`SparseArrays.jl` package](https://docs.julialang.org/en/v1/stdlib/Spar
 healthy = Dict("fruits" => ["🍎", "🍊"], "vegetables" => ["🌽", "🎃", "🍕"])
 
 # ╔═╡ c83b1770-fb82-11ea-20a6-3d3a09606c62
-healthy["fruits"]
+healthy["vegetables"]
 
 # ╔═╡ 52970ac4-fb82-11ea-3040-8bd0590348d2
 md"""
@@ -666,7 +693,13 @@ Dict(
 function word_counts(words::Vector)
 	counts = Dict()
 	
-	# your code here
+	for word in words
+		if !haskey(counts,word)
+			counts[word] = 1
+		else
+			counts[word] += 1
+		end
+	end
 	
 	return counts
 end
@@ -679,8 +712,11 @@ md"""
 How many times does `"Emma"` occur in the book?
 """
 
+# ╔═╡ 21788339-2b5f-4ff4-8dcd-1b2c7b51ded9
+word_counts(emma_words)
+
 # ╔═╡ 953363dc-fb84-11ea-1128-ebdfaf5160ee
-emma_count = missing
+emma_count = word_counts(emma_words)["Emma"]
 
 # ╔═╡ 294b6f50-fb84-11ea-1382-03e9ab029a2d
 md"""
@@ -709,8 +745,15 @@ If the same ngram occurs multiple times (e.g. "said Emma laughing"), then the la
 # ╔═╡ b726f824-fb5e-11ea-328e-03a30544037f
 function completions_cache(grams)
 	cache = Dict()
-	
-	# your code here
+	n = length(grams[1])
+	for gram in grams
+		c = [word for word in gram[1:n-1]]
+		if !haskey(cache,c)
+			cache[c] = [gram[n]]
+		else
+			cache[c] = push!(cache[c],gram[n])
+		end
+	end
 	
 	cache
 end
@@ -815,9 +858,6 @@ md"""
 Uncomment the cell below to generate some Jane Austen text:
 """
 
-# ╔═╡ 49b69dc2-fb8f-11ea-39af-030b5c5053c3
-# generate(emma, 100; n=4) |> Quote
-
 # ╔═╡ cc07f576-fbf3-11ea-2c6f-0be63b9356fc
 if student.name == "Jazzy Doe"
 	md"""
@@ -866,6 +906,9 @@ generate(
 	n=generate_sample_n_words, 
 	use_words=true
 ) |> Quote
+
+# ╔═╡ 49b69dc2-fb8f-11ea-39af-030b5c5053c3
+generate(emma, 100; n=4) |> Quote
 
 # ╔═╡ ddef9c94-fb96-11ea-1f17-f173a4ff4d89
 function compimg(img, labels=[c*d for c in replace(alphabet, ' ' => "_"), d in replace(alphabet, ' ' => "_")])
@@ -1205,7 +1248,7 @@ bigbreak
 # ╠═571d28d6-f960-11ea-1b2e-d5977ecbbb11
 # ╠═6a64ab12-f960-11ea-0d92-5b88943cdb1a
 # ╟─603741c2-f9a4-11ea-37ce-1b36ecc83f45
-# ╟─b3de6260-f9a4-11ea-1bae-9153a92c3fe5
+# ╠═b3de6260-f9a4-11ea-1bae-9153a92c3fe5
 # ╠═a6c36bd6-f9a4-11ea-1aba-f75cecc90320
 # ╟─6d3f9dae-f9a5-11ea-3228-d147435e266d
 # ╠═92bf9fd2-f9a5-11ea-25c7-5966e44db6c6
@@ -1223,9 +1266,9 @@ bigbreak
 # ╠═b5b8dd18-f938-11ea-157b-53b145357fd1
 # ╠═0e872a6c-f937-11ea-125e-37958713a495
 # ╟─77623f3e-f9a9-11ea-2f46-ff07bd27cd5f
-# ╠═318ed90e-d375-4c71-9a11-3bca7142cfbf
-# ╠═b6924c2b-ee93-4609-948f-ab83e4883ed2
-# ╠═4e4b6f7f-a8bd-471e-bbc3-e28078aa1e87
+# ╠═bb78ff93-78d0-4a08-9575-e6e40d84b8c4
+# ╠═84217329-3452-4811-8ee3-838fac150885
+# ╠═9101c88a-a77e-4f69-b8a8-dd9d9b30821a
 # ╠═fbb7c04e-f92d-11ea-0b81-0be20da242c8
 # ╠═80118bf8-f931-11ea-34f3-b7828113ffd8
 # ╠═7f4f6ce4-f931-11ea-15a4-b3bec6a7e8b6
@@ -1264,6 +1307,7 @@ bigbreak
 # ╠═fd202410-f936-11ea-1ad6-b3629556b3e0
 # ╠═892b4795-66fa-4bcb-8dac-13452b24f4e2
 # ╠═0e465160-f937-11ea-0ebb-b7e02d71e8a8
+# ╠═bd0481f4-fdc5-44f4-b809-c689986d9680
 # ╟─6718d26c-f9b0-11ea-1f5a-0f22f7ddffe9
 # ╟─141af892-f933-11ea-1e5f-154167642809
 # ╟─7eed9dde-f931-11ea-38b0-db6bfcc1b558
@@ -1274,15 +1318,21 @@ bigbreak
 # ╠═7dabee08-f931-11ea-0cb2-c7d5afd21551
 # ╟─3736a094-fb57-11ea-1d39-e551aae62b1d
 # ╠═13c89272-f934-11ea-07fe-91b5d56dedf8
-# ╟─7d60f056-f931-11ea-39ae-5fa18a955a77
+# ╠═909019f6-736f-4285-9aee-48921a28cdf9
+# ╠═6e287e5e-c5de-41ad-bb56-6c3620cca3e8
+# ╠═c456d387-cc0e-4a96-ac74-26a99a3f9697
+# ╠═7d60f056-f931-11ea-39ae-5fa18a955a77
 # ╟─b09f5512-fb58-11ea-2527-31bea4cee823
 # ╟─8c7606f0-fb93-11ea-0c9c-45364892cbb8
 # ╟─568f0d3a-fb54-11ea-0f77-171718ef12a5
 # ╟─82e0df62-fb54-11ea-3fff-b16c87a7d45b
+# ╠═02e23272-cdc8-46ef-89b1-49ccc8d24758
+# ╠═456f65b9-3705-4ea3-80e0-6ab820d28619
 # ╠═b7601048-fb57-11ea-0754-97dc4e0623a1
-# ╟─cc42de82-fb5a-11ea-3614-25ef961729ab
+# ╠═cc42de82-fb5a-11ea-3614-25ef961729ab
 # ╠═d66fe2b2-fb5a-11ea-280f-cfb12b8296ac
 # ╠═4ca8e04a-fb75-11ea-08cc-2fdef5b31944
+# ╠═4adfb73b-b592-474c-97da-fb2b45d66ce6
 # ╟─6f613cd2-fb5b-11ea-1669-cbd355677649
 # ╠═91e87974-fb78-11ea-3ce4-5f64e506b9d2
 # ╠═9f98e00e-fb78-11ea-0f6c-01206e7221d6
@@ -1302,6 +1352,7 @@ bigbreak
 # ╠═a2214e50-fb83-11ea-3580-210f12d44182
 # ╟─a9ffff9a-fb83-11ea-1efd-2fc15538e52f
 # ╟─808abf6e-fb84-11ea-0785-2fc3f1c4a09f
+# ╠═21788339-2b5f-4ff4-8dcd-1b2c7b51ded9
 # ╠═953363dc-fb84-11ea-1128-ebdfaf5160ee
 # ╟─294b6f50-fb84-11ea-1382-03e9ab029a2d
 # ╠═b726f824-fb5e-11ea-328e-03a30544037f
@@ -1310,11 +1361,11 @@ bigbreak
 # ╟─3d105742-fb8d-11ea-09b0-cd2e77efd15c
 # ╟─a72fcf5a-fb62-11ea-1dcc-11451d23c085
 # ╟─f83991c0-fb7c-11ea-0e6f-1f80709d00c1
-# ╟─4b27a89a-fb8d-11ea-010b-671eba69364e
+# ╠═4b27a89a-fb8d-11ea-010b-671eba69364e
 # ╟─d7b7a14a-fb90-11ea-3e2b-2fd8f379b4d8
 # ╟─1939dbea-fb63-11ea-0bc2-2d06b2d4b26c
-# ╟─70169682-fb8c-11ea-27c0-2dad2ff3080f
-# ╟─b5dff8b8-fb6c-11ea-10fc-37d2a9adae8c
+# ╠═70169682-fb8c-11ea-27c0-2dad2ff3080f
+# ╠═b5dff8b8-fb6c-11ea-10fc-37d2a9adae8c
 # ╟─402562b0-fb63-11ea-0769-375572cc47a8
 # ╟─ee8c5808-fb5f-11ea-19a1-3d58217f34dc
 # ╟─2521bac8-fb8f-11ea-04a4-0b077d77529e
@@ -1323,7 +1374,7 @@ bigbreak
 # ╟─cc07f576-fbf3-11ea-2c6f-0be63b9356fc
 # ╟─6b4d6584-f3be-11ea-131d-e5bdefcc791b
 # ╟─54b1e236-fb53-11ea-3769-b382ef8b25d6
-# ╠═b7803a28-fb96-11ea-3e30-d98eb322d19a
+# ╟─b7803a28-fb96-11ea-3e30-d98eb322d19a
 # ╟─ddef9c94-fb96-11ea-1f17-f173a4ff4d89
 # ╟─ffc17f40-f380-11ea-30ee-0fe8563c0eb1
 # ╟─ffc40ab2-f380-11ea-2136-63542ff0f386
