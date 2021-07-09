@@ -13,6 +13,15 @@ macro bind(def, element)
     end
 end
 
+# ╔═╡ 63acc274-52ed-4fac-a775-57e20f931a5a
+begin
+	import Pkg
+	Pkg.add("ColorSchemes")
+end
+
+# ╔═╡ 4f99a8b0-7816-498c-8934-e915aacd8b1b
+Pkg.add("ForwardDiff")
+
 # ╔═╡ 0dcfd858-f867-11ea-301c-c3ca0a224117
 using Plots
 
@@ -74,8 +83,14 @@ md"A matrix that can be written exactly as a single multiplication table is call
 # ╔═╡ 2e8ae92a-f867-11ea-0219-1bdd9627c1ea
 md"Let's see what a general rank-1 matrix looks like:"
 
+# ╔═╡ eedbb59c-a24d-44e7-a019-5a20c953f1c5
+[1; 0.4; rand(50)]
+
 # ╔═╡ 38adc490-f867-11ea-1de5-3b633aff7c97
 image = outer([1; 0.4; rand(50)], rand(500));
+
+# ╔═╡ 3d423412-3f7f-43b5-8d04-f5dae6f86aa3
+size(image)
 
 # ╔═╡ 9cf23f9a-f864-11ea-3a08-af448aceefd8
 md"Now what happens if we add a little bit of **noise**, i.e. randomness?"
@@ -566,10 +581,12 @@ colors[ismissing.(M3)]
 # ╟─cdbe1d8e-f905-11ea-3884-efeeef386dda
 # ╟─d9aa9af0-f865-11ea-379e-f16b452bd94c
 # ╟─2e8ae92a-f867-11ea-0219-1bdd9627c1ea
+# ╠═eedbb59c-a24d-44e7-a019-5a20c953f1c5
 # ╠═38adc490-f867-11ea-1de5-3b633aff7c97
+# ╠═3d423412-3f7f-43b5-8d04-f5dae6f86aa3
 # ╠═b183b6ca-f864-11ea-0b34-4dd3f4f5e69d
 # ╟─9cf23f9a-f864-11ea-3a08-af448aceefd8
-# ╟─a5b62530-f864-11ea-21e8-71ccfed487f8
+# ╠═a5b62530-f864-11ea-21e8-71ccfed487f8
 # ╠═5471ddce-f867-11ea-2519-21981f5ea68b
 # ╟─c41df86c-f865-11ea-1253-4942bbdbe9d2
 # ╟─7fca33ac-f864-11ea-2a8b-933eb382c172
@@ -581,13 +598,13 @@ colors[ismissing.(M3)]
 # ╟─8775b3fe-f866-11ea-3e6f-9732e39a3525
 # ╠═0dcfd858-f867-11ea-301c-c3ca0a224117
 # ╠═7bacf44e-f896-11ea-38be-2b16ae7ca99f
-# ╟─1147cbda-f867-11ea-08fa-ef6ed2ae1e93
+# ╠═1147cbda-f867-11ea-08fa-ef6ed2ae1e93
 # ╟─8a611e36-f867-11ea-121f-317b7c145fe3
 # ╟─f7371934-f867-11ea-3b53-d1566684585c
 # ╟─119dc35c-ec94-11ea-190c-23a750fbe7f4
-# ╟─1e058ba2-ec94-11ea-09af-7f9f9cc3a233
+# ╠═1e058ba2-ec94-11ea-09af-7f9f9cc3a233
 # ╠═2043d4e6-ec94-11ea-1e1a-c75742eafe71
-# ╟─2a705962-ec94-11ea-1181-2f001ccf472f
+# ╠═2a705962-ec94-11ea-1181-2f001ccf472f
 # ╟─987c1f2e-f868-11ea-1125-0d8c02843ae4
 # ╟─9e78b048-f868-11ea-192e-d903265d1eb5
 # ╟─24df1f32-ec90-11ea-1f6d-03c1bfa5df8e
@@ -647,6 +664,7 @@ colors[ismissing.(M3)]
 # ╟─da7592da-f902-11ea-2cee-dbaefacdc382
 # ╠═a0e357a0-f902-11ea-1895-651d395d025d
 # ╟─1cf3e098-f864-11ea-3f3a-c53017b73490
+# ╠═63acc274-52ed-4fac-a775-57e20f931a5a
 # ╠═35e83a04-f864-11ea-0a8e-9ddf6eec02f3
 # ╠═2917943c-f864-11ea-3ee6-db952ca7cd67
 # ╠═72bb11b0-f88f-11ea-0e55-b1108300f854
@@ -655,6 +673,7 @@ colors[ismissing.(M3)]
 # ╠═7040dc72-f893-11ea-3d22-4fbd452faa41
 # ╠═1dbcf15a-f890-11ea-008c-8935edfbdb1c
 # ╠═20e94d56-f890-11ea-3953-cbd70cec8ebd
+# ╠═4f99a8b0-7816-498c-8934-e915aacd8b1b
 # ╠═16887070-f891-11ea-2db3-47b91930e728
 # ╠═1d7e264c-f891-11ea-131d-134cbfff1ac0
 # ╠═7715e100-f893-11ea-3768-f9a59d8cc06c

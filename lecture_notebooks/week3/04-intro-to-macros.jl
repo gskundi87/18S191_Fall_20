@@ -1,8 +1,14 @@
 ### A Pluto.jl notebook ###
-# v0.11.14
+# v0.14.8
 
 using Markdown
 using InteractiveUtils
+
+# ╔═╡ 605ff2b7-4816-4024-96f5-97f246c087a7
+begin
+	import Pkg
+	Pkg.add("Suppressor")
+end
 
 # ╔═╡ a31e1a3a-f637-11ea-1e0f-2d61b88049db
 using Suppressor, InteractiveUtils
@@ -215,16 +221,17 @@ end
 # ╠═906e3234-f637-11ea-1f77-679dc897ec69
 # ╟─940f888c-f637-11ea-20a0-1ddda8fb7908
 # ╠═77437eaa-f639-11ea-0c4d-3756cbd589da
-# ╠═8dab58d4-f639-11ea-1b0b-536927639c6c
+# ╟─8dab58d4-f639-11ea-1b0b-536927639c6c
 # ╠═e46e6c96-f1ee-11ea-3e7f-4f613282ccb1
 # ╠═e631bede-f1ee-11ea-0fab-7516ab535cf5
-# ╠═95cf0d76-f639-11ea-34dc-f32852ac32b8
+# ╟─95cf0d76-f639-11ea-34dc-f32852ac32b8
 # ╠═9a587ba4-f639-11ea-2bef-37fed4d45a7f
 # ╠═9cd4334e-f639-11ea-26c6-e9782451ef02
-# ╠═a037391e-f639-11ea-2723-455ccff4b024
+# ╟─a037391e-f639-11ea-2723-455ccff4b024
 # ╠═b6e67c1a-f639-11ea-3abe-f75671ed4ca2
 # ╟─cb0cb434-f639-11ea-1ea2-93009c372885
 # ╟─0ff6e154-f1ef-11ea-2ee8-61eb98523642
 # ╟─aa3a731c-f637-11ea-3afc-9144bdeb7d6f
+# ╠═605ff2b7-4816-4024-96f5-97f246c087a7
 # ╠═a31e1a3a-f637-11ea-1e0f-2d61b88049db
 # ╠═b440b66c-f637-11ea-393d-9d444aa58501

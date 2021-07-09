@@ -384,17 +384,17 @@ cs[outer(rand(1:10, 3), rand(1:10, 5))]
 # ╔═╡ 8d2bae22-f5df-11ea-10d3-859f4c3aa6c7
 Gray.((100 .- outer(1:10, 1:10)) ./ 100)
 
-# ╔═╡ e23debc8-f5df-11ea-2c1e-b58a64f9acd3
-ColorSchemes.rainbow[floor.(Int, (1:10, 1:10) ./ 10)]
+# ╔═╡ 2dc0860b-5aab-4665-8c08-bacfaec9d532
+floor.(outer(1:10, 1:10) ./ 10)
 
-# ╔═╡ 70b8918e-f5e0-11ea-3c86-6fa72df5a28e
-ColorSchemes.rainbow.colors[floor.(Int, outer(1:10, 1:10) ./ 10)]
+# ╔═╡ 0d562090-8432-46a2-9f6b-86a6d3a0e55a
+ceil.(outer(1:10, 1:10) ./ 10)
+
+# ╔═╡ e23debc8-f5df-11ea-2c1e-b58a64f9acd3
+ColorSchemes.rainbow[ceil.(Int, (outer(1:10, 1:10) ./ 10))]
 
 # ╔═╡ a0934122-f5e0-11ea-1f3b-ab0021ac6906
 ColorSchemes.rainbow.colors[ceil.(Int, outer(1:10, 1:10) ./ 10)]
-
-# ╔═╡ b9381b8a-f5e0-11ea-1f84-e39325203038
-
 
 # ╔═╡ 4cf96558-f5e0-11ea-19be-db4c59a41120
 ColorSchemes.rainbow
@@ -438,7 +438,7 @@ pr, pg, pb = eachslice(picture, dims=1)
 [RGB.(pr, 0, 0) RGB.(0, pg, 0) RGB.(0, 0, pb)]
 
 # ╔═╡ fee66076-f5f9-11ea-2316-abc57b62a57c
-RGB.(image
+RGB.(image)
 
 # ╔═╡ 6532b388-f5f9-11ea-2ae2-f9b12e441bb3
 pr
@@ -450,8 +450,17 @@ begin
 	Ub, Σb, Vb = svd(pb)
 end
 
+# ╔═╡ 5cc4ab8c-c4dc-4d91-a0cc-050144ed9997
+size(Ur)
+
+# ╔═╡ b199355f-b688-43bf-a132-3621d1950711
+size(Vr)
+
+# ╔═╡ f22d85ac-c5f0-498a-b335-9139474dda87
+size(Σr)
+
 # ╔═╡ 3c28c4c2-f5fa-11ea-1947-9dfe91ea1535
-RGB.(sum(outer(Ur[:,i], Vr[:,i]) .* Σr[i] for i in 1:5), 0, 0)
+RGB.(sum(outer(Ur[:,i], Vr[:,i]) .* Σr[i] for i in 1:216), 0, 0)
 
 # ╔═╡ f56f40e4-f5fa-11ea-3a99-156565445c2e
 @bind n Slider(1:100, show_value=true)
@@ -460,9 +469,6 @@ RGB.(sum(outer(Ur[:,i], Vr[:,i]) .* Σr[i] for i in 1:5), 0, 0)
 RGB.(sum(outer(Ur[:,i], Vr[:,i]) .* Σr[i] for i in 1:n), 
 	sum(outer(Ug[:,i], Vg[:,i]) .* Σg[i] for i in 1:n),
 	sum(outer(Ub[:,i], Vb[:,i]) .* Σb[i] for i in 1:n))
-
-# ╔═╡ 8a22387e-f5fb-11ea-249b-435af5c0a6b6
-
 
 # ╔═╡ 8df84fcc-f5d5-11ea-312f-bf2a3b3ce2ce
 md"## Appendix"
@@ -593,11 +599,11 @@ end
 # ╠═389ae62e-f5db-11ea-1557-c3adbbee0e5c
 # ╟─0c2b6408-f5d9-11ea-2b7f-7fece2eecc1f
 # ╟─542a9556-f5db-11ea-0375-99f52416f6e4
-# ╠═165788b2-f601-11ea-3e69-cdbbb6558e54
+# ╟─165788b2-f601-11ea-3e69-cdbbb6558e54
 # ╠═22941bb8-f601-11ea-1d6e-0d955297bc2e
 # ╠═2f75df7e-f601-11ea-2fc2-aff4f335af33
-# ╠═53e6b612-f601-11ea-05a9-5395e69b3c41
-# ╠═5a493052-f601-11ea-2f5f-f940412905f2
+# ╟─53e6b612-f601-11ea-05a9-5395e69b3c41
+# ╟─5a493052-f601-11ea-2f5f-f940412905f2
 # ╠═8633afb2-f601-11ea-206b-e9c4b9621c2a
 # ╠═9918c4fa-f601-11ea-3bf1-3506dcb437f7
 # ╟─3e919766-f601-11ea-0485-05f45484bf8d
@@ -640,15 +646,15 @@ end
 # ╠═e8d727f2-f5de-11ea-1456-f72602e81e0d
 # ╠═4c80c786-f5df-11ea-31ec-318439349648
 # ╠═8d2bae22-f5df-11ea-10d3-859f4c3aa6c7
+# ╠═2dc0860b-5aab-4665-8c08-bacfaec9d532
+# ╠═0d562090-8432-46a2-9f6b-86a6d3a0e55a
 # ╠═e23debc8-f5df-11ea-2c1e-b58a64f9acd3
-# ╠═70b8918e-f5e0-11ea-3c86-6fa72df5a28e
 # ╠═a0934122-f5e0-11ea-1f3b-ab0021ac6906
-# ╠═b9381b8a-f5e0-11ea-1f84-e39325203038
 # ╠═4cf96558-f5e0-11ea-19be-db4c59a41120
 # ╠═11de523c-f5e0-11ea-2f3d-c981c1b6a1fe
 # ╠═fb0c6c7e-f5df-11ea-38d0-2d98c9dc232f
-# ╠═ebd72fb8-f5e0-11ea-0630-573337dff753
-# ╠═f00d1eaa-f5e0-11ea-21df-d9cf6f7af9b9
+# ╟─ebd72fb8-f5e0-11ea-0630-573337dff753
+# ╟─f00d1eaa-f5e0-11ea-21df-d9cf6f7af9b9
 # ╠═b6478e1a-f5f6-11ea-3b92-6d4f067285f4
 # ╠═d4a049a2-f5f8-11ea-2f34-4bc0e3a5954a
 # ╠═f2c11f88-f5f8-11ea-3e02-c1d4fa22031e
@@ -659,10 +665,12 @@ end
 # ╠═fee66076-f5f9-11ea-2316-abc57b62a57c
 # ╠═6532b388-f5f9-11ea-2ae2-f9b12e441bb3
 # ╠═0c0ee362-f5f9-11ea-0f75-2d2810c88d65
+# ╠═5cc4ab8c-c4dc-4d91-a0cc-050144ed9997
+# ╠═b199355f-b688-43bf-a132-3621d1950711
+# ╠═f22d85ac-c5f0-498a-b335-9139474dda87
 # ╠═3c28c4c2-f5fa-11ea-1947-9dfe91ea1535
 # ╠═f56f40e4-f5fa-11ea-3a99-156565445c2e
 # ╠═7ba6e6a6-f5fa-11ea-2bcd-616d5a3c898b
-# ╠═8a22387e-f5fb-11ea-249b-435af5c0a6b6
 # ╠═4f8684ea-f5fb-11ea-07be-11d8046f35df
 # ╠═8df84fcc-f5d5-11ea-312f-bf2a3b3ce2ce
 # ╠═91980bcc-f5d5-11ea-211f-e9a08ff0fb19
