@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.11.14
+# v0.14.8
 
 using Markdown
 using InteractiveUtils
@@ -7,14 +7,14 @@ using InteractiveUtils
 # ╔═╡ c63c2fbc-f1dd-11ea-3081-cd1f11630f23
 using Pkg
 
+# ╔═╡ ca0e570a-f1dd-11ea-1655-29faf543c20a
+Pkg.activate(mktempdir())
+
 # ╔═╡ bdbb7f1e-f1dd-11ea-1219-91d906455e4a
 begin
 	Pkg.add("Suppressor")
 	using Suppressor
 end
-
-# ╔═╡ ca0e570a-f1dd-11ea-1655-29faf543c20a
-Pkg.activate(mktempdir())
 
 # ╔═╡ 41e94dd4-f1d9-11ea-2d2f-4b521ddb2284
 md"""
@@ -32,6 +32,9 @@ md"""
 
 # ╔═╡ b00ae624-f1d9-11ea-003a-a149946054a9
 a = 1.0 + 2.0im
+
+# ╔═╡ 176b609b-8e50-4a26-80c2-ace346b3c052
+Complex(1.0,2.0)
 
 # ╔═╡ c3433912-f1d9-11ea-1198-095259b8c36a
 b = -2.0 + 2im
@@ -80,6 +83,9 @@ For example, `prod` function which finds the product of an array uses `*` within
 
 """
 
+# ╔═╡ 42260bd9-42a7-480e-8e84-e11bb0fccf9b
+md"__prod__ takes left-to-right product of elements in a vector"
+
 # ╔═╡ de7f0034-f1df-11ea-36e8-1d9720219a30
 prod([a,b,a,b])
 
@@ -88,6 +94,9 @@ prod([1,2,3,4])
 
 # ╔═╡ dc718976-fce6-11ea-31fe-478aec584c33
 prod( [rand(2,2) for i=1:4] )
+
+# ╔═╡ b0d4b011-3d3f-46d8-8069-2dcbd58a817e
+md"Here we are taking the product of 4 2x2 random matrices"
 
 # ╔═╡ f8fdbc82-fcd4-11ea-2c4f-0bd4db86b30e
 md"This is a big deal, and it's called *Generic Programming* "
@@ -217,6 +226,7 @@ end
 # ╟─41e94dd4-f1d9-11ea-2d2f-4b521ddb2284
 # ╟─8983cd52-f1d9-11ea-1be0-c9d7d64e8942
 # ╠═b00ae624-f1d9-11ea-003a-a149946054a9
+# ╠═176b609b-8e50-4a26-80c2-ace346b3c052
 # ╠═c3433912-f1d9-11ea-1198-095259b8c36a
 # ╠═a81c0d26-f1d9-11ea-3319-19c78805c432
 # ╟─e779062e-f1d9-11ea-11c2-678f14dcd4a0
@@ -226,9 +236,11 @@ end
 # ╟─56398582-f1da-11ea-2ae7-6f55de7e9e82
 # ╠═3e455938-f1da-11ea-1dc3-778cef1b6189
 # ╟─73bef402-f1df-11ea-36d5-13e346ee1d59
+# ╟─42260bd9-42a7-480e-8e84-e11bb0fccf9b
 # ╠═de7f0034-f1df-11ea-36e8-1d9720219a30
 # ╠═f0325696-f1df-11ea-2fc0-236d41409f16
 # ╠═dc718976-fce6-11ea-31fe-478aec584c33
+# ╟─b0d4b011-3d3f-46d8-8069-2dcbd58a817e
 # ╟─f8fdbc82-fcd4-11ea-2c4f-0bd4db86b30e
 # ╟─ba55539c-f1db-11ea-1744-41d9fc14d417
 # ╠═7ab12188-fcd7-11ea-3d1b-db3bcb8c93e2
