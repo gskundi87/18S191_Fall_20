@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.11.14
+# v0.14.7
 
 using Markdown
 using InteractiveUtils
@@ -86,32 +86,16 @@ map(special_dogs) do dog
 	dog.photo
 end
 
-# ╔═╡ 0758eff0-fcd4-11ea-3186-e1f76a06b91c
-bigbreak = html"""
-<div style="height: 100vh;"></div>
-"""
-
-# ╔═╡ 175cb644-fcd5-11ea-22f2-3f96d6d2e637
-bigbreak
-
-# ╔═╡ d5c31a1a-fcd8-11ea-0841-1f4a056c048e
-bigbreak
-
-# ╔═╡ c8fc9460-fce3-11ea-0f2a-1b87abdd12b7
-bigbreak
-
 # ╔═╡ Cell order:
 # ╟─32465c0e-fcd4-11ea-1544-df26081c7fa7
 # ╠═65c59b14-fcd7-11ea-2a19-3d084b3bca56
 # ╠═249cf7dc-fcdb-11ea-3630-ed2369d20041
-# ╟─175cb644-fcd5-11ea-22f2-3f96d6d2e637
 # ╠═6b91914a-fcd4-11ea-0d27-c99e7ef99354
 # ╠═b5614d1a-fcd4-11ea-19b9-45043b16b332
 # ╠═0991e74c-fce3-11ea-0616-336e1d5d83e9
 # ╠═10fe7950-fce3-11ea-1ace-e1676961935e
 # ╠═2424dd62-fce3-11ea-14a6-81792a7dee89
 # ╠═2fb8117e-fce3-11ea-2492-55e4768f6e37
-# ╟─d5c31a1a-fcd8-11ea-0841-1f4a056c048e
 # ╟─a34557ac-fce3-11ea-1391-3d0cddd4201b
 # ╠═70aa854a-fce5-11ea-3477-6df2b0ca1d22
 # ╟─cbfc5ede-fce3-11ea-2044-15b8a07ef5f2
@@ -121,5 +105,3 @@ bigbreak
 # ╠═b7608b28-fceb-11ea-3742-a7828971d170
 # ╠═c53212da-fceb-11ea-0eeb-617a18323021
 # ╠═ea0ca73c-fceb-11ea-348a-5df7974b4aba
-# ╟─c8fc9460-fce3-11ea-0f2a-1b87abdd12b7
-# ╟─0758eff0-fcd4-11ea-3186-e1f76a06b91c
