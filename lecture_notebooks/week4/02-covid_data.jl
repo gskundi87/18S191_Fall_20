@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.11.14
+# v0.14.8
 
 using Markdown
 using InteractiveUtils
@@ -26,9 +26,6 @@ begin
 	using LsqFit
 	using Plots
 end
-
-# ╔═╡ a26b8742-6a16-445a-ae77-25a4189c0f14
-
 
 # ╔═╡ cbd9c1aa-fc37-11ea-29d9-e3361406796f
 using Dates
@@ -100,13 +97,13 @@ We can use the `head` function to see only the first few lines of the data.
 # ╔═╡ a054e048-4fea-487c-9d06-463723c7151c
 begin
 	data_2 = rename(data, 1 => "province", 2 => "country", 3 => "latitude", 4 => "longitude")   
-	head(data_2)
+	first(data_2,5)
 end
 
 # ╔═╡ e9ad97b6-fdef-4f48-bd32-634cfd2ce0e6
 begin
 	rename!(data, 1 => "province", 2 => "country", 3 => "latitude", 4 => "longitude") 
-	head(data)
+	first(data,5)
 end
 
 # ╔═╡ aaa7c012-fc1f-11ea-3c6c-89630affb1db
@@ -440,11 +437,11 @@ begin
 	
 	scatter(data.longitude, data.latitude, leg=false, alpha=0.5, ms=2)
 
-	for i in 1:length(province)	
-		annotate!(data.longitude[i], data.latitude[i], text(province[i], :center, 5, color=RGBA{Float64}(0.0,0.0,0.0,0.3)))
-	end
+# 	for i in 1:length(province)	
+# 		annotate!(data.longitude[i], data.latitude[i], text(province[i], :center, 5, 			color=RGBA{Float64}(0.0,0.0,0.0,0.3)))
+# 	end
 	
-	plot!(axis=false)
+ 	plot!(axis=false)
 end
 
 # ╔═╡ 16981da0-fc4d-11ea-37a2-535aa014a298
@@ -478,9 +475,6 @@ end
 # ╔═╡ ada44a56-fc56-11ea-2ab7-fb649be7e066
 shp_countries = Shapefile.shapes(Shapefile.Table("./ne_110m_admin_0_countries.shp"))
 
-# ╔═╡ d911edb6-fc87-11ea-2258-d34d61c02245
-
-
 # ╔═╡ b3e1ebf8-fc56-11ea-05b8-ed0b9e50503d
 plot!(shp_countries, alpha=0.2)
 
@@ -504,7 +498,7 @@ dates[day2]
 # ╔═╡ 24934438-fc74-11ea-12e4-7f7e50f54029
 world_plot = begin 
 	plot(shp_countries, alpha=0.2)
-	scatter!(data.longitude, data.latitude, leg=false, ms=2*log10.(daily[:, day2]), alpha=0.7)
+	scatter!(data.longitude, data.latitude, leg=false, ms=2*log10.(daily[:, day]), alpha=0.7)
 	xlabel!("latitude")
 	ylabel!("longitude")
 	title!("daily cases per country")
@@ -570,7 +564,6 @@ Unfortunately, published visualisations often hide some of  this information. Th
 # ╠═f75e1992-fcfb-11ea-1123-b59bf888eac3
 # ╟─67eebb7e-fc36-11ea-03ef-bd6966487bb5
 # ╠═7b5db0f4-fc36-11ea-09a5-49def64f4c79
-# ╠═a26b8742-6a16-445a-ae77-25a4189c0f14
 # ╠═f099424c-0e22-42fb-894c-d8c2a65715fb
 # ╟─7e7d14a2-fc37-11ea-3f1a-870ca98c4b75
 # ╟─75d2dc66-fc47-11ea-0e35-05f9cf38e901
@@ -623,7 +616,6 @@ Unfortunately, published visualisations often hide some of  this information. Th
 # ╟─b93b88b0-fc4d-11ea-0c45-8f64983f8b5c
 # ╠═7ec28cd0-fc87-11ea-2de5-1959ea5dc37c
 # ╟─ada44a56-fc56-11ea-2ab7-fb649be7e066
-# ╠═d911edb6-fc87-11ea-2258-d34d61c02245
 # ╠═b3e1ebf8-fc56-11ea-05b8-ed0b9e50503d
 # ╟─f8e754ee-fc73-11ea-0c7f-cdc760ab3e94
 # ╠═39982810-fc76-11ea-01c3-3987cfc2fd3c
