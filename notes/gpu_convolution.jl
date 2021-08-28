@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.8
+# v0.15.1
 
 using Markdown
 using InteractiveUtils
@@ -13,6 +13,12 @@ begin
 	using LinearAlgebra
 	using OffsetArrays
 end
+
+# ╔═╡ da942fc4-ad10-4376-8bf4-0360cab9622b
+using CUDA
+
+# ╔═╡ a89a6220-2a5d-47bf-a8ac-84f3e01f079c
+using GPUArrays
 
 # ╔═╡ 00235a62-ceed-11eb-3a33-0791db95f4c0
 begin
@@ -48,6 +54,9 @@ g = SMatrix{1,1}
 # ╔═╡ 9b849e00-bac7-4829-8b89-5bdecded47d8
 julia_logo = load("julia_logo.png")
 
+
+# ╔═╡ df3bb0f7-b715-4b24-bb2d-d14297e15342
+img = julia_logo
 
 # ╔═╡ 375f237c-3975-43ec-8b90-efaf65d59c86
 function gaussian_filter(σ, l = 4*ceil(Int,σ)+1)
@@ -87,10 +96,16 @@ filter = gaussian_filter(σ)
 padded_img, range = pad(julia_logo, size(filter, 1) ÷ 2)
 
 # ╔═╡ a0483675-47ad-4869-a844-a19e541d2f46
-blurred = convolve2D.(range, (padded_img,), (filter,))
+begin
+	blurred = similar(julia_logo)
+	blurred = convolve2D.(range, (padded_img,), (filter,))
+end
 
 # ╔═╡ af775c52-e678-4cc4-8145-8eb1b3352331
 size(blurred)
+
+# ╔═╡ f9dc2e08-a41d-4386-9521-8e25aed580f6
+gpu_range = cu(range)
 
 # ╔═╡ 5c7baa6a-4cef-4f16-9956-ed99876fc00a
 padded_img
@@ -100,6 +115,30 @@ typeof(padded_img)
 
 # ╔═╡ 9c159e89-4273-4b98-90a1-88762cf7815f
 size(padded_img)
+
+# ╔═╡ 8cf054d6-fffb-41d5-8f37-8a55527af4f8
+begin
+	import CUDA.Adapt
+end
+
+# ╔═╡ 739b6a96-7fa9-484b-b3fd-b450d490b5f0
+# begin
+# 	Adapt.adapt_structure(to, x::OffsetArray) = OffsetArray(Adapt.adapt(to, parent(x)), x.offsets)
+# 	Base.Broadcast.BroadcastStyle(::Type{<:OffsetArray{<:Any, <:Any, AA}}) where AA =  	Base.Broadcast.BroadcastStyle(AA)
+# 	forcerun = nothing
+# end
+
+# ╔═╡ c54e9e04-26fd-47d5-a99f-7b490a0f77c0
+gpu_img = cu(padded_img)
+
+# ╔═╡ 559c3b2f-12c7-4cbd-bbb1-e7ed26e011a3
+typeof(gpu_img)
+
+# ╔═╡ 80168a00-296c-48dd-a81f-1bc3bcb896e3
+gpu_blurred = cu(similar(img, RGBA{Float64}))
+
+# ╔═╡ bfd0bf1e-5670-4c49-b645-9d897a08aad2
+gpu_blurred .= convolve2D.(gpu_range, (gpu_img,), (filter,))
 
 # ╔═╡ Cell order:
 # ╠═fe4ba61d-9a27-4cae-a6cc-75f576286fc2
@@ -111,15 +150,25 @@ size(padded_img)
 # ╠═8006a802-7026-40c0-b493-ce09acc39535
 # ╠═c411fe0b-3c9b-41e7-b6b9-8ca1cc3f8f31
 # ╠═9b849e00-bac7-4829-8b89-5bdecded47d8
+# ╠═df3bb0f7-b715-4b24-bb2d-d14297e15342
 # ╠═375f237c-3975-43ec-8b90-efaf65d59c86
 # ╠═6e6b967f-7646-49ff-8cff-a177615262f1
 # ╠═db7f16ce-5b5d-42cd-ab91-3f01e4123052
 # ╠═a0483675-47ad-4869-a844-a19e541d2f46
 # ╠═9e549bc9-ba12-4bfd-97f2-6b3a35b56f32
 # ╠═af775c52-e678-4cc4-8145-8eb1b3352331
+# ╠═da942fc4-ad10-4376-8bf4-0360cab9622b
+# ╠═f9dc2e08-a41d-4386-9521-8e25aed580f6
 # ╠═46ec42ca-ea7f-4d8b-a95a-6977393a76bb
 # ╠═5c7baa6a-4cef-4f16-9956-ed99876fc00a
 # ╠═9716c114-734a-4066-a157-e7901a4cc619
 # ╠═9c159e89-4273-4b98-90a1-88762cf7815f
 # ╠═ffe7ef4c-944b-4e6e-b567-1c7049f639ac
 # ╠═ce86b824-902f-4469-9443-026477d1c5f7
+# ╠═8cf054d6-fffb-41d5-8f37-8a55527af4f8
+# ╠═739b6a96-7fa9-484b-b3fd-b450d490b5f0
+# ╠═c54e9e04-26fd-47d5-a99f-7b490a0f77c0
+# ╠═559c3b2f-12c7-4cbd-bbb1-e7ed26e011a3
+# ╠═80168a00-296c-48dd-a81f-1bc3bcb896e3
+# ╠═bfd0bf1e-5670-4c49-b645-9d897a08aad2
+# ╠═a89a6220-2a5d-47bf-a8ac-84f3e01f079c

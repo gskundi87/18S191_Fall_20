@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.8
+# v0.15.1
 
 using Markdown
 using InteractiveUtils
@@ -227,6 +227,12 @@ first_sample = clean(first(samples))
 # ╔═╡ cc012b3a-6481-46ac-8d95-a06c6cabf33f
 count.(["a"],first_sample)
 
+# ╔═╡ 0240662f-db4c-4533-9dd3-1270972ea581
+string(alphabet)[1]
+
+# ╔═╡ bc1ee0d1-4fba-4496-9f67-a3e50e2f3798
+f = count.(string.(alphabet), first_sample)
+
 # ╔═╡ 571d28d6-f960-11ea-1b2e-d5977ecbbb11
 function letter_frequencies(txt)
 	ismissing(txt) && return missing
@@ -285,6 +291,9 @@ sum(sample_freqs)
 
 # ╔═╡ b84e5a4a-be46-4f7e-bc08-6261a1df9d24
 sample_freqs
+
+# ╔═╡ 68014bc2-9d5c-4a18-a0c4-bf7420744150
+cumsum(sample_freqs)
 
 # ╔═╡ 1dccf315-f6a1-4b90-a502-47b822926627
 cumsum(sample_freqs ./ sum(sample_freqs))
@@ -392,7 +401,7 @@ sum(sample_freq_matrix[:,index_of_letter('w')])
 sum(sample_freq_matrix[index_of_letter('w'),:])
 
 # ╔═╡ cc62929e-f9af-11ea-06b9-439ac08dcb52
-row_col_answer = md"""The frequency of the letter (and the row and column sum are the same
+row_col_answer = md"""The frequency of the letter (and the row and column sum) are the same
 """
 
 # ╔═╡ 2f8dedfc-fb98-11ea-23d7-2159bdb6a299
@@ -534,6 +543,11 @@ We will train our model on the novel [_Emma_ (1815), by Jane Austen](https://en.
 # ╔═╡ 02e23272-cdc8-46ef-89b1-49ccc8d24758
 raw_text = read(download("https://ia800303.us.archive.org/24/items/EmmaJaneAusten_753/emma_pdf_djvu.txt"), String)
 
+# ╔═╡ 456f65b9-3705-4ea3-80e0-6ab820d28619
+# open("Emma.txt", "w") do file
+#     write(file, emma)
+# end
+
 # ╔═╡ b7601048-fb57-11ea-0754-97dc4e0623a1
 emma = let
 	raw_text = read(download("https://ia800303.us.archive.org/24/items/EmmaJaneAusten_753/emma_pdf_djvu.txt"), String)
@@ -545,11 +559,6 @@ emma = let
 	
 	raw_text[start_index:stop_index]
 end;
-
-# ╔═╡ 456f65b9-3705-4ea3-80e0-6ab820d28619
-open("Emma.txt", "w") do file
-    write(file, emma)
-end
 
 # ╔═╡ cc42de82-fb5a-11ea-3614-25ef961729ab
 function splitwords(text)
@@ -908,7 +917,7 @@ generate(
 ) |> Quote
 
 # ╔═╡ 49b69dc2-fb8f-11ea-39af-030b5c5053c3
-generate(emma, 100; n=4) |> Quote
+generate(emma, 100; n=11) |> Quote
 
 # ╔═╡ ddef9c94-fb96-11ea-1f17-f173a4ff4d89
 function compimg(img, labels=[c*d for c in replace(alphabet, ' ' => "_"), d in replace(alphabet, ' ' => "_")])
@@ -1245,6 +1254,8 @@ bigbreak
 # ╟─eaa8c79e-f9a2-11ea-323f-8bb2bd36e11c
 # ╠═2680b506-f9a3-11ea-0849-3989de27dd9f
 # ╠═cc012b3a-6481-46ac-8d95-a06c6cabf33f
+# ╠═0240662f-db4c-4533-9dd3-1270972ea581
+# ╠═bc1ee0d1-4fba-4496-9f67-a3e50e2f3798
 # ╠═571d28d6-f960-11ea-1b2e-d5977ecbbb11
 # ╠═6a64ab12-f960-11ea-0d92-5b88943cdb1a
 # ╟─603741c2-f9a4-11ea-37ce-1b36ecc83f45
@@ -1262,6 +1273,7 @@ bigbreak
 # ╟─343d63c2-fb58-11ea-0cce-efe1afe070c2
 # ╠═0e1e3c4c-7c13-4a2a-bab8-f7676c87bac5
 # ╠═b84e5a4a-be46-4f7e-bc08-6261a1df9d24
+# ╠═68014bc2-9d5c-4a18-a0c4-bf7420744150
 # ╠═1dccf315-f6a1-4b90-a502-47b822926627
 # ╠═b5b8dd18-f938-11ea-157b-53b145357fd1
 # ╠═0e872a6c-f937-11ea-125e-37958713a495
@@ -1300,9 +1312,9 @@ bigbreak
 # ╟─2f8dedfc-fb98-11ea-23d7-2159bdb6a299
 # ╟─b7446f34-f9b1-11ea-0f39-a3c17ba740e5
 # ╟─4f97b572-f9b0-11ea-0a99-87af0797bf28
-# ╟─46c905d8-f9b0-11ea-36ed-0515e8ed2621
+# ╠═46c905d8-f9b0-11ea-36ed-0515e8ed2621
 # ╟─4e8d327e-f9b0-11ea-3f16-c178d96d07d9
-# ╟─489b03d4-f9b0-11ea-1de0-11d4fe4e7c69
+# ╠═489b03d4-f9b0-11ea-1de0-11d4fe4e7c69
 # ╟─d83f8bbc-f9af-11ea-2392-c90e28e96c65
 # ╠═fd202410-f936-11ea-1ad6-b3629556b3e0
 # ╠═892b4795-66fa-4bcb-8dac-13452b24f4e2
@@ -1312,7 +1324,7 @@ bigbreak
 # ╟─141af892-f933-11ea-1e5f-154167642809
 # ╟─7eed9dde-f931-11ea-38b0-db6bfcc1b558
 # ╟─7e3282e2-f931-11ea-272f-d90779264456
-# ╟─7d1439e6-f931-11ea-2dab-41c66a779262
+# ╠═7d1439e6-f931-11ea-2dab-41c66a779262
 # ╠═7df55e6c-f931-11ea-33b8-fdc3be0b6cfa
 # ╟─292e0384-fb57-11ea-0238-0fbe416fc976
 # ╠═7dabee08-f931-11ea-0cb2-c7d5afd21551
@@ -1367,7 +1379,7 @@ bigbreak
 # ╠═70169682-fb8c-11ea-27c0-2dad2ff3080f
 # ╠═b5dff8b8-fb6c-11ea-10fc-37d2a9adae8c
 # ╟─402562b0-fb63-11ea-0769-375572cc47a8
-# ╟─ee8c5808-fb5f-11ea-19a1-3d58217f34dc
+# ╠═ee8c5808-fb5f-11ea-19a1-3d58217f34dc
 # ╟─2521bac8-fb8f-11ea-04a4-0b077d77529e
 # ╠═49b69dc2-fb8f-11ea-39af-030b5c5053c3
 # ╟─7f341c4e-fb54-11ea-1919-d5421d7a2c75
