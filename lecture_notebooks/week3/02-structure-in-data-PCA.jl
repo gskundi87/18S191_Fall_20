@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.8
+# v0.15.1
 
 using Markdown
 using InteractiveUtils
@@ -18,6 +18,12 @@ begin
 	import Pkg
 	Pkg.add("ColorSchemes")
 end
+
+# ╔═╡ 404c62cb-ad42-4c1a-bf44-bd3a7ab8cec5
+Pkg.add("PlutoUI")
+
+# ╔═╡ 87a00b6d-ffad-4e49-8b5d-d7da1040a0ff
+Pkg.add("Images")
 
 # ╔═╡ 4f99a8b0-7816-498c-8934-e915aacd8b1b
 Pkg.add("ForwardDiff")
@@ -128,9 +134,11 @@ md"## Plotting data"
 # ╔═╡ 8775b3fe-f866-11ea-3e6f-9732e39a3525
 md"We would like to **visualise** this data. There are various plotting packages that we could use. We will use `Plots.jl`:"
 
+# ╔═╡ cc147f8b-b469-443b-a2a0-e08b5fe5b922
+gr()
+
 # ╔═╡ 7bacf44e-f896-11ea-38be-2b16ae7ca99f
-scatter(xx, yy, alpha=0.5, framestyle=:origin, label="original image", leg=:topleft,
-		xlabel="x values", ylabel="y values")
+scatter(vec(xx), vec(yy), alpha=0.5, framestyle=:origin, label="original image", leg=:topleft, xlabel="x values", ylabel="y values")
 
 # ╔═╡ 1147cbda-f867-11ea-08fa-ef6ed2ae1e93
 begin
@@ -597,11 +605,13 @@ colors[ismissing.(M3)]
 # ╟─f574ad7c-f866-11ea-0efa-d9d0602aa63b
 # ╟─8775b3fe-f866-11ea-3e6f-9732e39a3525
 # ╠═0dcfd858-f867-11ea-301c-c3ca0a224117
+# ╠═cc147f8b-b469-443b-a2a0-e08b5fe5b922
 # ╠═7bacf44e-f896-11ea-38be-2b16ae7ca99f
 # ╠═1147cbda-f867-11ea-08fa-ef6ed2ae1e93
 # ╟─8a611e36-f867-11ea-121f-317b7c145fe3
 # ╟─f7371934-f867-11ea-3b53-d1566684585c
 # ╟─119dc35c-ec94-11ea-190c-23a750fbe7f4
+# ╠═404c62cb-ad42-4c1a-bf44-bd3a7ab8cec5
 # ╠═1e058ba2-ec94-11ea-09af-7f9f9cc3a233
 # ╠═2043d4e6-ec94-11ea-1e1a-c75742eafe71
 # ╠═2a705962-ec94-11ea-1181-2f001ccf472f
@@ -665,6 +675,7 @@ colors[ismissing.(M3)]
 # ╠═a0e357a0-f902-11ea-1895-651d395d025d
 # ╟─1cf3e098-f864-11ea-3f3a-c53017b73490
 # ╠═63acc274-52ed-4fac-a775-57e20f931a5a
+# ╠═87a00b6d-ffad-4e49-8b5d-d7da1040a0ff
 # ╠═35e83a04-f864-11ea-0a8e-9ddf6eec02f3
 # ╠═2917943c-f864-11ea-3ee6-db952ca7cd67
 # ╠═72bb11b0-f88f-11ea-0e55-b1108300f854

@@ -1,8 +1,11 @@
 ### A Pluto.jl notebook ###
-# v0.14.8
+# v0.14.7
 
 using Markdown
 using InteractiveUtils
+
+# ╔═╡ 6bf92d92-058e-41bf-b5eb-1724ff102b8e
+using Pkg
 
 # ╔═╡ 4723a50e-f6d1-11ea-0b1c-3d33a9b92f87
 md"# Defining new types"
@@ -195,6 +198,9 @@ cc + cc
 # ╔═╡ 8cd9f438-f6de-11ea-2b58-93bbb860a005
 @which 3 + cc
 
+# ╔═╡ b0005216-b4d1-42a7-937a-2469b3b3278c
+Pkg.update("Pluto")
+
 # ╔═╡ Cell order:
 # ╟─4723a50e-f6d1-11ea-0b1c-3d33a9b92f87
 # ╟─b3bb0212-f6da-11ea-2bea-21a84ea741a9
@@ -248,3 +254,5 @@ cc + cc
 # ╠═84cae75c-f6de-11ea-3cd4-1b263e34771f
 # ╠═8ac4904a-f6de-11ea-105b-8925016ca6d5
 # ╠═8cd9f438-f6de-11ea-2b58-93bbb860a005
+# ╠═6bf92d92-058e-41bf-b5eb-1724ff102b8e
+# ╠═b0005216-b4d1-42a7-937a-2469b3b3278c
